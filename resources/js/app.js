@@ -19,3 +19,6 @@ document.addEventListener('submit',event=>{if(event.target.checkValidity()){even
 window.addEventListener('pageshow',()=>document.querySelectorAll('button[type=submit]').forEach(button=>button.disabled=false));
 if(document.body.dataset.reopen)openDialog(document.getElementById(document.body.dataset.reopen));
 setTimeout(()=>document.querySelector('.toast-region')?.remove(),5000);
+
+const newPassword=document.querySelector('#profile-form [name=password]');
+if(newPassword){const current=document.getElementById('current-password-field');const sync=()=>{current.hidden=!newPassword.value;current.querySelector('input').required=!!newPassword.value;};newPassword.addEventListener('input',sync);sync();}
