@@ -1,0 +1,186 @@
+{
+  "users": [
+    {
+      "id": "USR-001",
+      "username": "superadmin",
+      "nama": "Administrator",
+      "email": "admin@dlingo.test",
+      "role": "admin",
+      "no_telepon": "0812-0000-0001",
+      "created_at": "2026-07-02T08:00:00",
+      "updated_at": "2026-07-02T08:00:00",
+      "demo": true
+    },
+    {
+      "id": "USR-002",
+      "username": "admin",
+      "nama": "Budi Santoso",
+      "email": "budi@example.com",
+      "role": "petani",
+      "no_telepon": "0812-3456-7890",
+      "created_at": "2026-07-02T08:00:00",
+      "updated_at": "2026-07-02T08:00:00",
+      "no_rekening": "1234567890",
+      "nama_bank": "BRI",
+      "demo": true
+    },
+    {
+      "id": "USR-003",
+      "username": "pembeli",
+      "nama": "Andi Pratama",
+      "email": "andi@dlingo.test",
+      "role": "pembeli",
+      "no_telepon": "0811-111-111",
+      "alamat": "Jl. Merdeka No. 12",
+      "buyerId": "PBL-001",
+      "created_at": "2026-07-02T08:00:00",
+      "demo": true
+    }
+  ],
+  "products": [
+    {
+      "id": "PRD-001",
+      "nama": "Jamur Tiram",
+      "kategori": "Jamur",
+      "harga": 15000,
+      "satuan": "kg",
+      "stok": 25,
+      "deskripsi": "Jamur tiram segar dari budidaya petani Desa Dlingo. Dipanen dengan teliti untuk menjaga kualitas dan kesegarannya.",
+      "art": "tiram",
+      "ownerId": "USR-002"
+    },
+    {
+      "id": "PRD-002",
+      "nama": "Jamur Kuping",
+      "kategori": "Jamur",
+      "harga": 20000,
+      "satuan": "kg",
+      "stok": 8,
+      "deskripsi": "Jamur kuping pilihan dengan tekstur kenyal. Cocok untuk melengkapi sup, tumisan, dan berbagai olahan rumahan.",
+      "art": "kuping",
+      "ownerId": "USR-002"
+    },
+    {
+      "id": "PRD-003",
+      "nama": "Baglog Tiram",
+      "kategori": "Baglog",
+      "harga": 12000,
+      "satuan": "pcs",
+      "stok": 150,
+      "deskripsi": "Media tanam jamur tiram siap budidaya. Pilihan praktis untuk memulai dan mengembangkan usaha jamur Anda.",
+      "art": "baglog",
+      "ownerId": "USR-002"
+    }
+  ],
+  "buyers": [
+    {
+      "id": "PBL-001",
+      "nama": "Warung Makmur",
+      "no_telepon": "0811-111-111",
+      "email": "",
+      "alamat": "Jl. Merdeka No. 12",
+      "ownerId": "USR-002"
+    },
+    {
+      "id": "PBL-002",
+      "nama": "Toko Segar",
+      "no_telepon": "0811-222-222",
+      "email": "",
+      "alamat": "Jl. Kemangi No. 7",
+      "ownerId": "USR-002"
+    }
+  ],
+  "staff": [
+    {
+      "id": "PGR-001",
+      "nama": "Slamet Riyadi",
+      "no_telepon": "0812-9876-543",
+      "email": "",
+      "alamat": "Desa Sumberejo",
+      "active": true,
+      "ownerId": "USR-002"
+    },
+    {
+      "id": "PGR-002",
+      "nama": "Supardi",
+      "no_telepon": "0812-2345-678",
+      "email": "",
+      "alamat": "Dukuh Krajan",
+      "active": true,
+      "ownerId": "USR-002"
+    },
+    {
+      "id": "PGR-003",
+      "nama": "Kartini",
+      "no_telepon": "0813-4567-890",
+      "email": "",
+      "alamat": "Kedungrejo",
+      "active": true,
+      "ownerId": "USR-002"
+    }
+  ],
+  "livestock": [
+    {
+      "id": "TNK-001",
+      "nama": "Sapi Limosingffggf",
+      "nomor": "TNK-001",
+      "kategori": "Sapi",
+      "usia": 36,
+      "berat": 350,
+      "harga": 15000000,
+      "staffIds": [
+        "PGR-001"
+      ],
+      "ownerId": "USR-002"
+    },
+    {
+      "id": "TNK-002",
+      "nama": "Sapi Brahman",
+      "nomor": "TNK-002",
+      "kategori": "Sapi",
+      "usia": 24,
+      "berat": 280,
+      "harga": 12000000,
+      "staffIds": [
+        "PGR-002"
+      ],
+      "ownerId": "USR-002"
+    },
+    {
+      "id": "TNK-003",
+      "nama": "Kambing PE",
+      "nomor": "TNK-003",
+      "kategori": "Kambing",
+      "usia": 12,
+      "berat": 45,
+      "harga": 3000000,
+      "staffIds": [
+        "PGR-001"
+      ],
+      "ownerId": "USR-002"
+    },
+    {
+      "id": "TNK-004",
+      "nama": "Sapi Simental",
+      "nomor": "TNK-004",
+      "kategori": "Sapi",
+      "usia": 48,
+      "berat": 320,
+      "harga": 18000000,
+      "staffIds": [
+        "PGR-003"
+      ],
+      "ownerId": "USR-002"
+    }
+  ],
+  "orders": [],
+  "activities": [
+    {
+      "id": "ACT-001",
+      "text": "Ternak Sapi Limosingffggf diubah",
+      "category": "Ternak",
+      "date": "2026-07-02T08:00:00",
+      "initial": true
+    }
+  ]
+}

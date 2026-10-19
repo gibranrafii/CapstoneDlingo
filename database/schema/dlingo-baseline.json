@@ -1,0 +1,478 @@
+[
+  {
+    "table": "detail_pesanan",
+    "column": "id_produk",
+    "type": "int(11)",
+    "nullable": "NO",
+    "key": "PRI"
+  },
+  {
+    "table": "detail_pesanan",
+    "column": "id_pesanan",
+    "type": "int(11)",
+    "nullable": "NO",
+    "key": "PRI"
+  },
+  {
+    "table": "detail_pesanan",
+    "column": "jumlah",
+    "type": "int(11)",
+    "nullable": "NO",
+    "key": ""
+  },
+  {
+    "table": "detail_pesanan",
+    "column": "harga_satuan",
+    "type": "decimal(12,2)",
+    "nullable": "NO",
+    "key": ""
+  },
+  {
+    "table": "detail_pesanan",
+    "column": "subtotal",
+    "type": "decimal(12,2)",
+    "nullable": "NO",
+    "key": ""
+  },
+  {
+    "table": "detail_pesanan",
+    "column": "created_at",
+    "type": "datetime",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "detail_pesanan",
+    "column": "updated_at",
+    "type": "datetime",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "pembeli",
+    "column": "id_pembeli",
+    "type": "int(11)",
+    "nullable": "NO",
+    "key": "PRI"
+  },
+  {
+    "table": "pembeli",
+    "column": "id_user",
+    "type": "int(11)",
+    "nullable": "NO",
+    "key": "MUL"
+  },
+  {
+    "table": "pembeli",
+    "column": "nama_pembeli",
+    "type": "varchar(255)",
+    "nullable": "NO",
+    "key": ""
+  },
+  {
+    "table": "pembeli",
+    "column": "alamat_pembeli",
+    "type": "varchar(255)",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "pembeli",
+    "column": "no_telepon_pembeli",
+    "type": "varchar(255)",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "pembeli",
+    "column": "email_pembeli",
+    "type": "varchar(255)",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "pembeli",
+    "column": "created_at",
+    "type": "datetime",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "pembeli",
+    "column": "updated_at",
+    "type": "datetime",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "pengurus",
+    "column": "id_pengurus",
+    "type": "int(11)",
+    "nullable": "NO",
+    "key": "PRI"
+  },
+  {
+    "table": "pengurus",
+    "column": "id_user",
+    "type": "int(11)",
+    "nullable": "NO",
+    "key": "MUL"
+  },
+  {
+    "table": "pengurus",
+    "column": "nama_pengurus",
+    "type": "varchar(255)",
+    "nullable": "NO",
+    "key": ""
+  },
+  {
+    "table": "pengurus",
+    "column": "no_telepon_pengurus",
+    "type": "varchar(255)",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "pengurus",
+    "column": "email_pengurus",
+    "type": "varchar(255)",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "pengurus",
+    "column": "alamat_pengurus",
+    "type": "varchar(255)",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "pengurus",
+    "column": "created_at",
+    "type": "datetime",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "pengurus",
+    "column": "updated_at",
+    "type": "datetime",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "pengurus_ternak",
+    "column": "id_pengurus",
+    "type": "int(11)",
+    "nullable": "NO",
+    "key": "PRI"
+  },
+  {
+    "table": "pengurus_ternak",
+    "column": "id_ternak",
+    "type": "int(11)",
+    "nullable": "NO",
+    "key": "PRI"
+  },
+  {
+    "table": "pengurus_ternak",
+    "column": "waktu_kontrak_awal",
+    "type": "datetime",
+    "nullable": "NO",
+    "key": "PRI"
+  },
+  {
+    "table": "pengurus_ternak",
+    "column": "waktu_kontrak_akhir",
+    "type": "datetime",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "pengurus_ternak",
+    "column": "status_kontrak",
+    "type": "varchar(255)",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "pengurus_ternak",
+    "column": "created_at",
+    "type": "datetime",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "pengurus_ternak",
+    "column": "updated_at",
+    "type": "datetime",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "pesanan",
+    "column": "id_pesanan",
+    "type": "int(11)",
+    "nullable": "NO",
+    "key": "PRI"
+  },
+  {
+    "table": "pesanan",
+    "column": "id_pembeli",
+    "type": "int(11)",
+    "nullable": "NO",
+    "key": "MUL"
+  },
+  {
+    "table": "pesanan",
+    "column": "tanggal_pesan",
+    "type": "datetime",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "pesanan",
+    "column": "total_harga",
+    "type": "decimal(12,2)",
+    "nullable": "NO",
+    "key": ""
+  },
+  {
+    "table": "pesanan",
+    "column": "alamat_kirim",
+    "type": "varchar(255)",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "pesanan",
+    "column": "catatan",
+    "type": "varchar(255)",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "pesanan",
+    "column": "status",
+    "type": "varchar(255)",
+    "nullable": "NO",
+    "key": ""
+  },
+  {
+    "table": "pesanan",
+    "column": "created_at",
+    "type": "datetime",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "pesanan",
+    "column": "updated_at",
+    "type": "datetime",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "product",
+    "column": "id_produk",
+    "type": "int(11)",
+    "nullable": "NO",
+    "key": "PRI"
+  },
+  {
+    "table": "product",
+    "column": "id_user",
+    "type": "int(11)",
+    "nullable": "NO",
+    "key": "MUL"
+  },
+  {
+    "table": "product",
+    "column": "nama_produk",
+    "type": "varchar(255)",
+    "nullable": "NO",
+    "key": ""
+  },
+  {
+    "table": "product",
+    "column": "deskripsi",
+    "type": "varchar(255)",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "product",
+    "column": "harga",
+    "type": "decimal(12,2)",
+    "nullable": "NO",
+    "key": ""
+  },
+  {
+    "table": "product",
+    "column": "satuan",
+    "type": "varchar(255)",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "product",
+    "column": "kategori",
+    "type": "varchar(255)",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "product",
+    "column": "stok",
+    "type": "int(11)",
+    "nullable": "NO",
+    "key": ""
+  },
+  {
+    "table": "product",
+    "column": "created_at",
+    "type": "datetime",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "product",
+    "column": "updated_at",
+    "type": "datetime",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "ternak",
+    "column": "id_ternak",
+    "type": "int(11)",
+    "nullable": "NO",
+    "key": "PRI"
+  },
+  {
+    "table": "ternak",
+    "column": "id_user",
+    "type": "int(11)",
+    "nullable": "NO",
+    "key": "MUL"
+  },
+  {
+    "table": "ternak",
+    "column": "nama_ternak",
+    "type": "varchar(255)",
+    "nullable": "NO",
+    "key": ""
+  },
+  {
+    "table": "ternak",
+    "column": "nomor_ternak",
+    "type": "varchar(255)",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "ternak",
+    "column": "kategori_ternak",
+    "type": "varchar(255)",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "ternak",
+    "column": "usia_ternak",
+    "type": "int(11)",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "ternak",
+    "column": "berat_ternak",
+    "type": "float",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "ternak",
+    "column": "harga_ternak",
+    "type": "decimal(14,2)",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "ternak",
+    "column": "created_at",
+    "type": "datetime",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "ternak",
+    "column": "updated_at",
+    "type": "datetime",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "user",
+    "column": "id_user",
+    "type": "int(11)",
+    "nullable": "NO",
+    "key": "PRI"
+  },
+  {
+    "table": "user",
+    "column": "username",
+    "type": "varchar(255)",
+    "nullable": "NO",
+    "key": "UNI"
+  },
+  {
+    "table": "user",
+    "column": "password",
+    "type": "varchar(255)",
+    "nullable": "NO",
+    "key": ""
+  },
+  {
+    "table": "user",
+    "column": "nama",
+    "type": "varchar(255)",
+    "nullable": "NO",
+    "key": ""
+  },
+  {
+    "table": "user",
+    "column": "email",
+    "type": "varchar(255)",
+    "nullable": "NO",
+    "key": "UNI"
+  },
+  {
+    "table": "user",
+    "column": "no_telepon",
+    "type": "varchar(255)",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "user",
+    "column": "role",
+    "type": "varchar(255)",
+    "nullable": "NO",
+    "key": ""
+  },
+  {
+    "table": "user",
+    "column": "created_at",
+    "type": "datetime",
+    "nullable": "YES",
+    "key": ""
+  },
+  {
+    "table": "user",
+    "column": "updated_at",
+    "type": "datetime",
+    "nullable": "YES",
+    "key": ""
+  }
+]
