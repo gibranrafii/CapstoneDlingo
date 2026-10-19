@@ -11,3 +11,8 @@
 .banner{padding:26px 28px}.banner h1{line-height:1.1;-webkit-text-stroke:.35px currentColor}.banner p{margin-top:8px}.banner .button{margin-top:20px}.stat-label{color:#12324d}.stat-value{-webkit-text-stroke:.3px currentColor}
 @media(max-width:767px){.banner,.banner.has-action{padding:22px 20px}}
 .section{margin-top:22px}.section-heading{margin-bottom:16px}.data-table td{padding-top:10px;padding-bottom:10px}
+/* Colors sampled from the DOCX; diagonal direction adapts to each banner. */
+:root{--blue:#0047ab;--bright:#155dfc}.page{padding-top:21px}.top-nav{gap:32px}.banner{padding:28px 28px 26px;background:linear-gradient(to bottom right,#0047ab 0%,#155dfc 50%,#002e6b 100%)}
+body[data-page=profile] .field{margin-bottom:14px}body[data-page=profile] .field label{font-size:12px}body[data-page=profile] .input{min-height:42px;padding-top:10px;padding-bottom:10px;font-weight:600}
+@media(max-width:1000px){.top-nav{gap:20px}}
+@media(max-width:767px){.page{padding-top:16px}.top-nav{gap:0}.banner,.banner.has-action{padding:22px 20px}}

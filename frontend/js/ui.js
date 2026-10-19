@@ -110,6 +110,15 @@
   }
   const authFormError = (form,error) => {const box=form.querySelector('[role=alert]');box.textContent=error.message;box.hidden=false;};
   const submit = (form,handler) => form.addEventListener('submit',async event=>{event.preventDefault();const btn=form.querySelector('[type=submit]');const error=form.querySelector('[role=alert]');if(error)error.hidden=true;btn.disabled=true;try{await handler(Object.fromEntries(new FormData(form)));}catch(e){if(error)authFormError(form,e);else toast(e.message,'error');}finally{btn.disabled=false;}});
+  window.addEventListener('dlingo:change',event=>{
+    const allowed=document.body.dataset.auth?.split(',');
+    if(!allowed)return;
+    const current=Demo.user();
+    if(!current||!allowed.includes(current.role)){
+      event.stopImmediatePropagation();
+      location.replace(url(current?dashboard(current.role):'login.html'));
+    }
+  });
   on('logout',()=>{Demo.logout();location.href=url('login.html');});
   on('history',()=>dialog('Riwayat Aktivitas',activities(30),null,''));
   on('bank',()=>{const u=Demo.user();form('Rekening Pembayaran',[
