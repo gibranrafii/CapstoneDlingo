@@ -7,3 +7,7 @@
 /* Login proportions follow the full-size DOCX capture. */
 .auth-logo{margin-bottom:24px}.auth-card h1{font-size:32px;letter-spacing:-1.6px;-webkit-text-stroke:.3px currentColor}.auth-subtitle{margin-bottom:32px}
 @media(max-width:767px){.auth-card h1{font-size:26px;letter-spacing:-1px}}
+/* Reference management banners use a compact 194px content area. */
+.banner{padding:26px 28px}.banner h1{line-height:1.1;-webkit-text-stroke:.35px currentColor}.banner p{margin-top:8px}.banner .button{margin-top:20px}.stat-label{color:#12324d}.stat-value{-webkit-text-stroke:.3px currentColor}
+@media(max-width:767px){.banner,.banner.has-action{padding:22px 20px}}
+.section{margin-top:22px}.section-heading{margin-bottom:16px}.data-table td{padding-top:10px;padding-bottom:10px}

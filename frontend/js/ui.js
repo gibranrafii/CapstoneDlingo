@@ -34,7 +34,7 @@
   const url = path => new URL(path,base).href;
   const money = n => 'Rp '+new Intl.NumberFormat('id-ID',{maximumFractionDigits:0}).format(Number(n)||0);
   const date = value => new Intl.DateTimeFormat('id-ID',{day:'2-digit',month:'long',year:'numeric'}).format(new Date(value));
-  const action = (label, name, glyph='plus', cls='') => `<button type="button" class="button ${cls}" data-action="${escape(name)}">${icon(glyph)}${escape(label)}</button>`;
+  const action = (label, name, glyph='plus', cls='') => `<button type="button" class="button ${cls}" data-action="${escape(name)}">${glyph?icon(glyph):''}${escape(label)}</button>`;
   const link = (label,path,glyph,cls='') => `<a class="button ${cls}" href="${url(path)}">${glyph?icon(glyph):''}${escape(label)}</a>`;
   const banner = (title,description,glyph,cta='') => `<section class="banner ${cta?'has-action':''}" aria-label="${escape(title)}"><h1>${escape(title)}</h1><p>${escape(description)}</p>${cta}<span class="banner-art">${icon(glyph)}</span></section>`;
   const stats = items => `<div class="stats ${items.length===3?'three':''}" style="--cols:${items.length===8?4:items.length}">${items.map(i=>`<div class="stat"><span class="stat-emoji" aria-hidden="true">${i[0]}</span><strong class="stat-value ${i[3]||''}">${escape(i[1])}</strong><span class="stat-label">${escape(i[2])}</span></div>`).join('')}</div>`;
