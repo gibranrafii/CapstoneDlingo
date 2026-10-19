@@ -5,6 +5,7 @@ use App\Services\Activity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{DB,Storage};
 class ProductsController extends Controller {
+    public function stock(){return view('manage.stock',['products'=>Product::orderBy('id_produk')->get()]);}
     public function index(){return view('manage.products',['products'=>Product::orderBy('id_produk')->get()]);}
     public function store(Request $r){return $this->save($r,new Product(['id_user'=>$r->user()->id_user]));}
     public function update(Request $r,int $id){return $this->save($r,Product::findOrFail($id));}
