@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daftar - JamurTani</title>
+  <meta name="description" content="Buat akun JamurTani untuk mulai berbelanja atau menjual produk pertanian." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/custom.css" />
+</head>
+<body class="min-h-screen bg-gradient-to-br from-green-950 via-green-900 to-green-800 flex items-center justify-center p-4 py-10">
+
+  <div class="w-full max-w-lg bg-white rounded-3xl overflow-hidden shadow-2xl animate-fade-in-up">
+    <div class="bg-gradient-to-r from-green-700 to-green-600 p-8 text-white text-center">
+      <a href="index.html" class="inline-flex items-center gap-2 mb-4">
+        <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center text-2xl">🍄</div>
+        <span class="font-bold text-xl">JamurTani</span>
+      </a>
+      <h1 class="text-2xl font-bold">Buat Akun Baru</h1>
+      <p class="text-green-200 text-sm mt-1">Bergabung dan mulai berbelanja atau berjualan</p>
+    </div>
+
+    <div class="p-8">
+      <form id="register-form" class="space-y-4">
+        <!-- Role Selection -->
+        <div>
+          <label class="form-label">Daftar Sebagai</label>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="role-option cursor-pointer">
+              <input type="radio" name="role" value="pembeli" class="hidden" checked />
+              <div class="role-card border-2 border-green-500 bg-green-50 rounded-xl p-4 text-center transition-all">
+                <div class="text-2xl mb-1">🛒</div>
+                <div class="font-semibold text-green-800 text-sm">Pembeli</div>
+                <div class="text-xs text-gray-500">Beli produk jamur</div>
+              </div>
+            </label>
+            <label class="role-option cursor-pointer">
+              <input type="radio" name="role" value="petani" class="hidden" />
+              <div class="role-card border-2 border-gray-200 rounded-xl p-4 text-center transition-all hover:border-green-300">
+                <div class="text-2xl mb-1">👨‍🌾</div>
+                <div class="font-semibold text-gray-700 text-sm">Petani</div>
+                <div class="text-xs text-gray-500">Jual produk & kelola ternak</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="form-label" for="nama">Nama Lengkap *</label>
+            <input type="text" id="nama" name="nama" class="form-input" placeholder="Nama Anda" required />
+          </div>
+          <div>
+            <label class="form-label" for="username">Username *</label>
+            <input type="text" id="username" name="username" class="form-input" placeholder="username" required />
+          </div>
+        </div>
+
+        <div>
+          <label class="form-label" for="email">Email *</label>
+          <input type="email" id="email" name="email" class="form-input" placeholder="nama@email.com" required />
+        </div>
+
+        <div>
+          <label class="form-label" for="no_telepon">No. Telepon</label>
+          <input type="tel" id="no_telepon" name="no_telepon" class="form-input" placeholder="08xxxxxxxxxx" />
+        </div>
+
+        <div>
+          <label class="form-label" for="alamat">Alamat</label>
+          <textarea id="alamat" name="alamat" class="form-input !h-20 resize-none" placeholder="Alamat lengkap Anda"></textarea>
+        </div>
+
+        <!-- Petani-only fields -->
+        <div id="petani-fields" class="hidden space-y-4 p-4 bg-amber-50 rounded-xl border border-amber-200">
+          <p class="text-amber-800 font-semibold text-sm">🏦 Informasi Rekening (untuk pembayaran)</p>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="form-label" for="nama_bank">Nama Bank</label>
+              <select id="nama_bank" name="nama_bank" class="form-input">
+                <option value="">Pilih Bank</option>
+                <option value="BRI">BRI</option>
+                <option value="BNI">BNI</option>
+                <option value="BCA">BCA</option>
+                <option value="Mandiri">Mandiri</option>
+                <option value="BSI">BSI</option>
+                <option value="Lainnya">Lainnya</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label" for="no_rekening">No. Rekening</label>
+              <input type="text" id="no_rekening" name="no_rekening" class="form-input" placeholder="1234567890" />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="form-label" for="reg-password">Password *</label>
+          <div class="relative">
+            <input type="password" id="reg-password" name="password" class="form-input !pr-12" placeholder="Min. 8 karakter" required minlength="6" />
+            <button type="button" id="toggle-reg-password" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            </button>
+          </div>
+          <div id="password-strength" class="mt-2 hidden">
+            <div class="flex gap-1 mb-1">
+              <div class="h-1 flex-1 rounded-full bg-gray-200" id="strength-bar-1"></div>
+              <div class="h-1 flex-1 rounded-full bg-gray-200" id="strength-bar-2"></div>
+              <div class="h-1 flex-1 rounded-full bg-gray-200" id="strength-bar-3"></div>
+              <div class="h-1 flex-1 rounded-full bg-gray-200" id="strength-bar-4"></div>
+            </div>
+            <p id="strength-text" class="text-xs text-gray-500"></p>
+          </div>
+        </div>
+
+        <!-- Error/Success -->
+        <div id="msg-box" class="hidden rounded-xl p-3 text-sm flex items-start gap-2"></div>
+
+        <button type="submit" id="submit-btn" class="btn-primary w-full justify-center py-3 text-base">
+          <span id="btn-text">Buat Akun</span>
+          <span id="btn-spinner" class="hidden">
+            <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+            Mendaftar...
+          </span>
+        </button>
+
+        <p class="text-center text-sm text-gray-500">
+          Sudah punya akun? <a href="login.html" class="text-green-600 font-semibold hover:underline">Masuk di sini</a>
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    // Role toggle
+    const roleOptions = document.querySelectorAll('.role-option');
+    roleOptions.forEach(option => {
+      const input = option.querySelector('input');
+      const card = option.querySelector('.role-card');
+      option.addEventListener('click', () => {
+        roleOptions.forEach(o => {
+          const c = o.querySelector('.role-card');
+          const i = o.querySelector('input');
+          c.classList.remove('border-green-500', 'bg-green-50');
+          c.classList.add('border-gray-200');
+        });
+        card.classList.add('border-green-500', 'bg-green-50');
+        card.classList.remove('border-gray-200');
+        document.getElementById('petani-fields').classList.toggle('hidden', input.value !== 'petani');
+      });
+    });
+
+    // Password toggle
+    document.getElementById('toggle-reg-password').addEventListener('click', () => {
+      const input = document.getElementById('reg-password');
+      input.type = input.type === 'password' ? 'text' : 'password';
+    });
+
+    // Password strength
+    document.getElementById('reg-password').addEventListener('input', (e) => {
+      const val = e.target.value;
+      const strength = document.getElementById('password-strength');
+      strength.classList.toggle('hidden', val.length === 0);
+      if (val.length === 0) return;
+
+      let score = 0;
+      if (val.length >= 8) score++;
+      if (/[A-Z]/.test(val)) score++;
+      if (/[0-9]/.test(val)) score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+
+      const bars = [1,2,3,4].map(i => document.getElementById(`strength-bar-${i}`));
+      const colors = ['bg-red-400', 'bg-orange-400', 'bg-yellow-400', 'bg-green-500'];
+      const labels = ['Lemah', 'Cukup', 'Baik', 'Kuat'];
+      bars.forEach((b, i) => {
+        b.className = `h-1 flex-1 rounded-full ${i < score ? colors[score - 1] : 'bg-gray-200'}`;
+      });
+      document.getElementById('strength-text').textContent = labels[score - 1] || '';
+    });
+
+    // Register
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const role = document.querySelector('input[name="role"]:checked')?.value || 'pembeli';
+      const data = {
+        username: document.getElementById('username').value.trim(),
+        nama: document.getElementById('nama').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        password: document.getElementById('reg-password').value,
+        no_telepon: document.getElementById('no_telepon').value.trim(),
+        alamat: document.getElementById('alamat').value.trim(),
+        role,
+        no_rekening: document.getElementById('no_rekening').value.trim(),
+        nama_bank: document.getElementById('nama_bank').value,
+      };
+
+      document.getElementById('btn-text').classList.add('hidden');
+      document.getElementById('btn-spinner').classList.remove('hidden');
+      document.getElementById('submit-btn').disabled = true;
+      document.getElementById('msg-box').classList.add('hidden');
+
+      try {
+        await authAPI.register(data);
+        const msgBox = document.getElementById('msg-box');
+        msgBox.className = 'rounded-xl p-3 text-sm flex items-start gap-2 bg-green-50 border border-green-200 text-green-800';
+        msgBox.innerHTML = '<span>✅</span><span>Registrasi berhasil! Mengarahkan ke halaman login...</span>';
+        msgBox.classList.remove('hidden');
+        setTimeout(() => window.location.href = 'login.html', 2000);
+      } catch (err) {
+        const msgBox = document.getElementById('msg-box');
+        msgBox.className = 'rounded-xl p-3 text-sm flex items-start gap-2 bg-red-50 border border-red-200 text-red-700';
+        msgBox.innerHTML = `<span>❌</span><span>${err.message || 'Registrasi gagal. Coba lagi.'}</span>`;
+        msgBox.classList.remove('hidden');
+        document.getElementById('btn-text').classList.remove('hidden');
+        document.getElementById('btn-spinner').classList.add('hidden');
+        document.getElementById('submit-btn').disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

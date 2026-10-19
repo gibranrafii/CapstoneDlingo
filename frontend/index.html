@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JamurTani - Marketplace Jamur & Peternakan Terpercaya</title>
+  <meta name="description" content="Beli jamur segar berkualitas langsung dari petani. Harga terbaik, produk terjamin, pengiriman cepat." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/custom.css" />
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: { primary: { 50: '#f0fdf4', 100: '#dcfce7', 500: '#22c55e', 600: '#16a34a', 700: '#15803d', 800: '#166534', 900: '#14532d' } } } }
+    }
+  </script>
+</head>
+<body class="bg-green-50">
+
+  <!-- ============================================================ -->
+  <!-- NAVBAR -->
+  <!-- ============================================================ -->
+  <nav class="navbar sticky top-0 z-40 px-4 py-3">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <!-- Logo -->
+      <a href="index.html" class="flex items-center gap-2">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center text-white font-bold text-lg">🍄</div>
+        <div>
+          <span class="font-bold text-green-800 text-lg leading-none">JamurTani</span>
+          <div class="text-xs text-green-600 leading-none">Marketplace Pertanian</div>
+        </div>
+      </a>
+
+      <!-- Search -->
+      <div class="hidden md:flex search-bar flex-1 max-w-md mx-8">
+        <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input type="text" id="search-input" placeholder="Cari produk jamur..." class="w-full" />
+      </div>
+
+      <!-- Nav links -->
+      <div class="flex items-center gap-3">
+        <!-- Cart (visible for pembeli) -->
+        <a href="pages/cart.html" id="cart-btn" class="relative p-2 text-green-700 hover:text-green-900 hidden">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-9H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+          <span class="cart-count cart-badge" style="display:none">0</span>
+        </a>
+
+        <div id="auth-buttons" class="flex items-center gap-2">
+          <a href="login.html" class="btn-secondary text-sm px-4 py-2">Masuk</a>
+          <a href="register.html" class="btn-primary text-sm px-4 py-2">Daftar</a>
+        </div>
+
+        <div id="user-menu" class="hidden relative">
+          <button id="user-menu-btn" class="flex items-center gap-2 bg-green-50 rounded-xl px-3 py-2 border border-green-200 hover:border-green-400 transition-all">
+            <div class="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center text-white text-sm font-bold" id="user-avatar">U</div>
+            <span class="text-sm font-semibold text-green-800" id="user-name">User</span>
+            <svg class="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-green-100 overflow-hidden z-50">
+            <a id="dashboard-link" href="#" class="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 hover:bg-green-50 transition-colors">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"/></svg>
+              Dashboard
+            </a>
+            <button onclick="logout()" class="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+              Keluar
+            </button>
+          </div>
+        </div>
+
+        <!-- Mobile menu btn -->
+        <button class="md:hidden p-2 text-green-700" id="mobile-menu-btn">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============================================================ -->
+  <!-- HERO SECTION -->
+  <!-- ============================================================ -->
+  <section class="hero-section py-20 px-4">
+    <div class="max-w-7xl mx-auto relative z-10">
+      <div class="grid md:grid-cols-2 gap-12 items-center">
+        <div class="animate-fade-in-up">
+          <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-green-100 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+            <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+            Platform Pertanian Terpercaya #1
+          </div>
+          <h1 class="text-4xl md:text-5xl font-bold text-white leading-tight mb-6">
+            Jamur Segar<br/>
+            <span class="text-green-300">Langsung dari</span><br/>
+            Petani ke Meja Anda
+          </h1>
+          <p class="text-green-100 text-lg mb-8 leading-relaxed">
+            Dapatkan jamur berkualitas tinggi dengan harga petani. Mendukung UMKM lokal dan menjamin kesegaran produk setiap hari.
+          </p>
+          <div class="flex flex-wrap gap-4">
+            <button onclick="document.getElementById('catalog-section').scrollIntoView({behavior:'smooth'})" class="btn-primary bg-white text-green-700 hover:bg-green-50 text-base px-8 py-3">
+              🛒 Belanja Sekarang
+            </button>
+            <a href="register.html" class="btn-secondary border-white text-white hover:bg-white hover:text-green-700 text-base px-8 py-3">
+              Daftar Gratis
+            </a>
+          </div>
+          <!-- Stats -->
+          <div class="flex gap-8 mt-10">
+            <div>
+              <div class="text-3xl font-bold text-white" id="stat-products">50+</div>
+              <div class="text-green-300 text-sm">Produk</div>
+            </div>
+            <div>
+              <div class="text-3xl font-bold text-white">10+</div>
+              <div class="text-green-300 text-sm">Petani</div>
+            </div>
+            <div>
+              <div class="text-3xl font-bold text-white">500+</div>
+              <div class="text-green-300 text-sm">Pelanggan</div>
+            </div>
+          </div>
+        </div>
+        <div class="hidden md:block animate-fade-in">
+          <div class="relative">
+            <div class="bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20">
+              <div class="grid grid-cols-2 gap-4">
+                <div class="bg-white/20 rounded-2xl p-4 text-center">
+                  <div class="text-4xl mb-2">🍄</div>
+                  <div class="text-white font-semibold text-sm">Jamur Tiram</div>
+                  <div class="text-green-300 text-xs">Rp 25.000/kg</div>
+                </div>
+                <div class="bg-white/20 rounded-2xl p-4 text-center">
+                  <div class="text-4xl mb-2">🌿</div>
+                  <div class="text-white font-semibold text-sm">Jamur Shiitake</div>
+                  <div class="text-green-300 text-xs">Rp 85.000/kg</div>
+                </div>
+                <div class="bg-white/20 rounded-2xl p-4 text-center">
+                  <div class="text-4xl mb-2">🐐</div>
+                  <div class="text-white font-semibold text-sm">Kambing</div>
+                  <div class="text-green-300 text-xs">Rp 2.500.000</div>
+                </div>
+                <div class="bg-white/20 rounded-2xl p-4 text-center">
+                  <div class="text-4xl mb-2">🐄</div>
+                  <div class="text-white font-semibold text-sm">Sapi</div>
+                  <div class="text-green-300 text-xs">Rp 18.000.000</div>
+                </div>
+              </div>
+              <div class="mt-4 bg-green-400/30 rounded-xl p-3 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-green-400 flex items-center justify-center text-white">✓</div>
+                <div>
+                  <div class="text-white font-semibold text-sm">Kualitas Terjamin</div>
+                  <div class="text-green-200 text-xs">Dipanen segar setiap hari</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- FEATURES -->
+  <!-- ============================================================ -->
+  <section class="py-12 px-4 bg-white">
+    <div class="max-w-7xl mx-auto">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div class="text-center p-6 rounded-2xl bg-green-50 hover:bg-green-100 transition-colors">
+          <div class="text-3xl mb-3">🌱</div>
+          <h3 class="font-bold text-green-800 mb-1">Produk Segar</h3>
+          <p class="text-sm text-gray-600">Dipanen langsung dari kebun petani</p>
+        </div>
+        <div class="text-center p-6 rounded-2xl bg-amber-50 hover:bg-amber-100 transition-colors">
+          <div class="text-3xl mb-3">💰</div>
+          <h3 class="font-bold text-amber-800 mb-1">Harga Terjangkau</h3>
+          <p class="text-sm text-gray-600">Langsung dari sumber tanpa perantara</p>
+        </div>
+        <div class="text-center p-6 rounded-2xl bg-blue-50 hover:bg-blue-100 transition-colors">
+          <div class="text-3xl mb-3">🔒</div>
+          <h3 class="font-bold text-blue-800 mb-1">Transaksi Aman</h3>
+          <p class="text-sm text-gray-600">Data terenkripsi dan terlindungi</p>
+        </div>
+        <div class="text-center p-6 rounded-2xl bg-purple-50 hover:bg-purple-100 transition-colors">
+          <div class="text-3xl mb-3">🤝</div>
+          <h3 class="font-bold text-purple-800 mb-1">Dukung Petani</h3>
+          <p class="text-sm text-gray-600">Membantu UMKM lokal berkembang</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- CATALOG SECTION -->
+  <!-- ============================================================ -->
+  <section id="catalog-section" class="py-16 px-4">
+    <div class="max-w-7xl mx-auto">
+      <!-- Header -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+        <div>
+          <h2 class="text-3xl font-bold text-green-900">Katalog Produk</h2>
+          <p class="text-gray-600 mt-1">Temukan berbagai produk jamur berkualitas dari petani terpercaya</p>
+        </div>
+        <!-- Filters -->
+        <div class="flex flex-wrap gap-3">
+          <select id="kategori-filter" class="form-input !w-auto text-sm">
+            <option value="">Semua Kategori</option>
+          </select>
+          <select id="sort-filter" class="form-input !w-auto text-sm">
+            <option value="created_at-DESC">Terbaru</option>
+            <option value="harga-ASC">Harga Terendah</option>
+            <option value="harga-DESC">Harga Tertinggi</option>
+            <option value="nama_produk-ASC">A - Z</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Mobile search -->
+      <div class="md:hidden search-bar mb-6">
+        <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input type="text" id="search-input-mobile" placeholder="Cari produk..." class="w-full" />
+      </div>
+
+      <!-- Products Grid -->
+      <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <!-- Loading skeletons -->
+        ${[1,2,3,4,5,6,7,8].map(() => `
+          <div class="product-card">
+            <div class="skeleton h-48 w-full"></div>
+            <div class="p-4">
+              <div class="skeleton h-5 w-3/4 mb-2"></div>
+              <div class="skeleton h-4 w-full mb-3"></div>
+              <div class="skeleton h-6 w-1/2"></div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- Empty state -->
+      <div id="empty-state" class="hidden text-center py-20">
+        <div class="text-6xl mb-4">🔍</div>
+        <h3 class="text-xl font-bold text-gray-700 mb-2">Produk tidak ditemukan</h3>
+        <p class="text-gray-500">Coba ubah kata kunci pencarian atau filter</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- FOOTER -->
+  <!-- ============================================================ -->
+  <footer class="bg-green-900 text-white py-12 px-4 mt-8">
+    <div class="max-w-7xl mx-auto">
+      <div class="grid md:grid-cols-3 gap-8 mb-8">
+        <div>
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-green-600 flex items-center justify-center text-xl">🍄</div>
+            <span class="font-bold text-xl">JamurTani</span>
+          </div>
+          <p class="text-green-300 text-sm leading-relaxed">Platform marketplace pertanian yang menghubungkan petani jamur dengan konsumen secara langsung.</p>
+        </div>
+        <div>
+          <h4 class="font-bold mb-4 text-green-300">Menu</h4>
+          <ul class="space-y-2 text-sm text-green-200">
+            <li><a href="index.html" class="hover:text-white transition-colors">🏠 Beranda</a></li>
+            <li><a href="login.html" class="hover:text-white transition-colors">🔑 Masuk</a></li>
+            <li><a href="register.html" class="hover:text-white transition-colors">📝 Daftar</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-bold mb-4 text-green-300">Tentang</h4>
+          <p class="text-sm text-green-200 leading-relaxed">Sistem ini dikembangkan sebagai proyek capstone untuk mendukung petani jamur dan peternak lokal Indonesia.</p>
+        </div>
+      </div>
+      <div class="border-t border-green-800 pt-6 text-center text-sm text-green-400">
+        &copy; 2024 JamurTani. Sistem Manajemen Pertanian & Peternakan.
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================ -->
+  <!-- SCRIPTS -->
+  <!-- ============================================================ -->
+  <script src="js/api.js"></script>
+  <script>
+    // ---- Auth State ----
+    const user = getUser();
+    if (user) {
+      document.getElementById('auth-buttons').classList.add('hidden');
+      document.getElementById('user-menu').classList.remove('hidden');
+      document.getElementById('user-name').textContent = user.nama?.split(' ')[0] || user.username;
+      document.getElementById('user-avatar').textContent = (user.nama?.[0] || user.username?.[0] || 'U').toUpperCase();
+      if (user.role === 'pembeli') document.getElementById('cart-btn').classList.remove('hidden');
+      const dashLink = document.getElementById('dashboard-link');
+      const roleMap = { admin: 'dashboard/admin.html', petani: 'dashboard/petani.html', pembeli: 'dashboard/pembeli.html' };
+      dashLink.href = `/frontend/${roleMap[user.role] || 'login.html'}`;
+    }
+
+    document.getElementById('user-menu-btn')?.addEventListener('click', () => {
+      document.getElementById('user-dropdown').classList.toggle('hidden');
+    });
+
+    // ---- Load Products ----
+    let allProducts = [];
+    let categories = [];
+
+    async function loadCategories() {
+      try {
+        const res = await productAPI.getCategories();
+        categories = res.data || [];
+        const select = document.getElementById('kategori-filter');
+        categories.forEach(cat => {
+          const opt = document.createElement('option');
+          opt.value = cat; opt.textContent = cat;
+          select.appendChild(opt);
+        });
+      } catch (e) {}
+    }
+
+    async function loadProducts(params = {}) {
+      try {
+        const res = await productAPI.getAll(params);
+        allProducts = res.data || [];
+        renderProducts(allProducts);
+      } catch (e) {
+        document.getElementById('products-grid').innerHTML = `<div class="col-span-full text-center py-10 text-red-500">Gagal memuat produk. Pastikan server berjalan.</div>`;
+      }
+    }
+
+    function renderProducts(products) {
+      const grid = document.getElementById('products-grid');
+      const empty = document.getElementById('empty-state');
+
+      if (products.length === 0) {
+        grid.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+
+      grid.innerHTML = products.map((p, i) => {
+        const img = getProductImageUrl(p.gambar);
+        const imgHtml = img
+          ? `<img src="${img}" alt="${p.nama_produk}" class="w-full h-48 object-cover" onerror="this.parentElement.innerHTML='<div class=\\'img-placeholder w-full h-48 text-5xl\\'>🍄</div>'">`
+          : `<div class="img-placeholder w-full h-48 text-5xl">🍄</div>`;
+
+        return `
+          <div class="product-card animate-fade-in-up" style="animation-delay:${i * 0.05}s">
+            <div class="overflow-hidden relative">
+              ${imgHtml}
+              <div class="absolute top-3 right-3">
+                <span class="bg-green-600 text-white text-xs font-bold px-2 py-1 rounded-lg">${p.kategori || 'Jamur'}</span>
+              </div>
+            </div>
+            <div class="p-4">
+              <h3 class="font-bold text-gray-800 mb-1 line-clamp-1">${p.nama_produk}</h3>
+              <p class="text-sm text-gray-500 mb-2 line-clamp-2">${p.deskripsi || 'Produk jamur berkualitas segar dari petani lokal.'}</p>
+              <div class="flex items-center gap-2 mb-1 text-xs text-gray-500">
+                <span>👨‍🌾 ${p.nama_petani || 'Petani'}</span>
+              </div>
+              <div class="flex items-center justify-between mt-3">
+                <div>
+                  <div class="text-green-700 font-bold text-lg">${formatCurrency(p.harga)}</div>
+                  <div class="text-xs text-gray-400">per ${p.satuan}</div>
+                </div>
+                <div class="flex gap-2">
+                  <a href="pages/product-detail.html?id=${p.id_produk}" class="p-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors" title="Lihat Detail">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  </a>
+                  ${user && user.role === 'pembeli' ? `
+                    <button onclick="addToCart(${JSON.stringify(p).replace(/"/g, '&quot;')})" class="btn-primary text-xs px-3 py-2">
+                      + Keranjang
+                    </button>
+                  ` : user ? '' : `
+                    <a href="login.html" class="btn-primary text-xs px-3 py-2">Beli</a>
+                  `}
+                </div>
+              </div>
+              <div class="mt-2 text-xs text-gray-400">Stok: <span class="${p.stok < 10 ? 'text-red-500 font-semibold' : 'text-green-600 font-semibold'}">${p.stok} ${p.satuan}</span></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function addToCart(product) {
+      cartManager.add(product);
+      toast.success(`${product.nama_produk} ditambahkan ke keranjang!`);
+    }
+
+    // ---- Filters ----
+    let searchTimeout;
+    const handleSearch = (val) => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => applyFilters(), 400);
+    };
+
+    const applyFilters = () => {
+      const search = document.getElementById('search-input').value || document.getElementById('search-input-mobile').value;
+      const kategori = document.getElementById('kategori-filter').value;
+      const [sort, order] = document.getElementById('sort-filter').value.split('-');
+      loadProducts({ search, kategori, sort, order });
+    };
+
+    document.getElementById('search-input').addEventListener('input', e => handleSearch(e.target.value));
+    document.getElementById('search-input-mobile').addEventListener('input', e => handleSearch(e.target.value));
+    document.getElementById('kategori-filter').addEventListener('change', applyFilters);
+    document.getElementById('sort-filter').addEventListener('change', applyFilters);
+
+    // ---- Init ----
+    loadCategories();
+    loadProducts();
+  </script>
+</body>
+</html>
