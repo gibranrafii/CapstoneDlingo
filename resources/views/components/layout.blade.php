@@ -1,5 +1,5 @@
 @props(['page','title','shell'=>'app'])
-@php($ui=\App\Support\Ui::class)
+@php $ui=\App\Support\Ui::class; @endphp
 <!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0047ab"><meta name="csrf-token" content="{{ csrf_token() }}"><title>{{ $title }} — Desa Dlingo</title>@vite(['resources/css/app.css','resources/js/app.js'])</head>
 <body data-page="{{ $page }}" data-reopen="{{ old('_modal') }}" class="{{ $shell==='auth'?'auth-page':'' }}"><a class="skip-link" href="#app-main">Lewati ke konten utama</a><div class="top-band"></div>
 @if($shell==='store')
