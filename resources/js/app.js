@@ -32,3 +32,5 @@ if(document.body.dataset.orderAuto)showOrder(document.body.dataset.orderAuto);
 document.querySelectorAll('[data-customer-address]').forEach(select=>select.addEventListener('change',()=>{select.closest('form').querySelector('[name=alamat_kirim]').value=select.selectedOptions[0]?.dataset.address||'';}));
 
 document.querySelectorAll('[data-filters] select').forEach(select=>select.addEventListener('change',()=>select.form.requestSubmit()));
+
+document.querySelectorAll('[data-quantity]').forEach(input=>input.addEventListener('change',()=>input.form.requestSubmit()));
