@@ -26,7 +26,10 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/products', require('./routes/products'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/livestock', require('./routes/livestock'));
+app.use('/api/ternak', require('./routes/livestock'));
 app.use('/api/users', require('./routes/users'));
+app.use('/api/pembeli', require('./routes/pembeli'));
+app.use('/api/pengurus', require('./routes/pengurus'));
 
 // Health check
 app.get('/api/health', (req, res) => {
