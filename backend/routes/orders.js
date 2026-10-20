@@ -5,7 +5,7 @@ const { getOrders, getOrderById, createOrder, updateOrderStatus } = require('../
 
 router.get('/', authenticate, getOrders);
 router.get('/:id', authenticate, getOrderById);
-router.post('/', authenticate, authorize('pembeli'), createOrder);
+router.post('/', authenticate, authorize('pembeli', 'petani', 'admin'), createOrder);
 router.put('/:id/status', authenticate, authorize('petani', 'admin'), updateOrderStatus);
 
 module.exports = router;
