@@ -11,4 +11,6 @@ class StoreController extends Controller {
         match($data['sort']??'name'){'price-low'=>$query->orderBy('harga'),'price-high'=>$query->orderByDesc('harga'),default=>$query->orderBy('nama_produk')};
         return view('store.index',['products'=>$query->orderBy('id_produk')->paginate(12)->withQueryString()]);
     }
+
+    public function show(int $id){return view('store.show',['product'=>Product::findOrFail($id),'farm'=>app(\App\Models\FarmSetting::class)]);}
 }
