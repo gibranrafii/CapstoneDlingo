@@ -10,4 +10,9 @@ class DashboardController extends Controller {
         return compact('herd','orders')+['products'=>Product::count(),'caretakers'=>Caretaker::where('is_active',true)->count(),'activities'=>DB::table('activity_logs')->latest('id')->limit(3)->get()];
     }
     public function farmer(){return view('dashboard.farmer',$this->farmMetrics()+['buyers'=>Buyer::count()]);}
+
+    public function admin(){
+        $users=User::where('is_active',true)->get();
+        return view('dashboard.admin',$this->farmMetrics()+['users'=>$users]);
+    }
 }
