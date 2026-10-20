@@ -1,48 +1,64 @@
 <?php
+
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BuyerOrdersController;
+use App\Http\Controllers\BuyersController;
+use App\Http\Controllers\CaretakersController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LivestockController;
+use App\Http\Controllers\OrdersController;
+use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\StoreController;
+use App\Http\Controllers\UsersController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\{AuthController,DashboardController,ProductsController,BuyersController,LivestockController,CaretakersController,OrdersController,BuyerOrdersController,ProfileController,UsersController,SettingsController,StoreController,CartController};
-Route::get('/',[StoreController::class,'index'])->name('store');
-Route::get('/products/{id}',[StoreController::class,'show'])->whereNumber('id')->name('products.show');
-Route::middleware('guest')->group(function(){
-    Route::get('/login',[AuthController::class,'loginForm'])->name('login');
-    Route::post('/login',[AuthController::class,'login'])->name('login.submit');
-    Route::get('/register',[AuthController::class,'registerForm'])->name('register');
-    Route::post('/register',[AuthController::class,'register'])->middleware('throttle:10,1')->name('register.submit');
+
+Route::get('/', [StoreController::class, 'index'])->name('store');
+Route::get('/products/{id}', [StoreController::class, 'show'])->whereNumber('id')->name('products.show');
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'loginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+    Route::get('/register', [AuthController::class, 'registerForm'])->name('register');
+    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:10,1')->name('register.submit');
 });
-Route::middleware('auth')->group(function(){
-    Route::post('/logout',[AuthController::class,'logout'])->name('logout');
-    Route::get('/dashboard',fn()=>redirect()->route('dashboard.'.match(auth()->user()->role){'admin'=>'admin','petani'=>'petani',default=>'pembeli'}))->name('dashboard');
-    Route::get('/dashboard/petani',[DashboardController::class,'farmer'])->middleware('can:manage-farm')->name('dashboard.petani');
-    Route::get('/dashboard/admin',[DashboardController::class,'admin'])->middleware('can:manage-users')->name('dashboard.admin');
-    Route::get('/dashboard/pembeli',[DashboardController::class,'buyer'])->middleware('can:buy')->name('dashboard.pembeli');
-    Route::get('/profile',[ProfileController::class,'edit'])->name('profile');
-    Route::put('/profile',[ProfileController::class,'update'])->name('profile.update');
-    Route::post('/farm/settings',[SettingsController::class,'update'])->middleware('can:manage-users')->name('farm.update');
-    Route::get('/orders/{id}',[OrdersController::class,'show'])->whereNumber('id')->name('orders.show');
-    Route::middleware('can:manage-farm')->prefix('manage')->name('manage.')->group(function(){
-        foreach(['products'=>ProductsController::class,'buyers'=>BuyersController::class,'livestock'=>LivestockController::class,'caretakers'=>CaretakersController::class] as $resource=>$controller){
-            Route::get('/'.$resource,[$controller,'index'])->name($resource.'.index');
-            Route::post('/'.$resource,[$controller,'store'])->name($resource.'.store');
-            Route::put('/'.$resource.'/{id}',[$controller,'update'])->whereNumber('id')->name($resource.'.update');
-            Route::delete('/'.$resource.'/{id}',[$controller,'destroy'])->whereNumber('id')->name($resource.'.destroy');
+Route::middleware('auth')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/dashboard', fn () => redirect()->route('dashboard.'.match (auth()->user()->role) {
+        'admin' => 'admin','petani' => 'petani',default => 'pembeli'
+    }))->name('dashboard');
+    Route::get('/dashboard/petani', [DashboardController::class, 'farmer'])->middleware('can:manage-farm')->name('dashboard.petani');
+    Route::get('/dashboard/admin', [DashboardController::class, 'admin'])->middleware('can:manage-users')->name('dashboard.admin');
+    Route::get('/dashboard/pembeli', [DashboardController::class, 'buyer'])->middleware('can:buy')->name('dashboard.pembeli');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/farm/settings', [SettingsController::class, 'update'])->middleware('can:manage-users')->name('farm.update');
+    Route::get('/orders/{id}', [OrdersController::class, 'show'])->whereNumber('id')->name('orders.show');
+    Route::middleware('can:manage-farm')->prefix('manage')->name('manage.')->group(function () {
+        foreach (['products' => ProductsController::class, 'buyers' => BuyersController::class, 'livestock' => LivestockController::class, 'caretakers' => CaretakersController::class] as $resource => $controller) {
+            Route::get('/'.$resource, [$controller, 'index'])->name($resource.'.index');
+            Route::post('/'.$resource, [$controller, 'store'])->name($resource.'.store');
+            Route::put('/'.$resource.'/{id}', [$controller, 'update'])->whereNumber('id')->name($resource.'.update');
+            Route::delete('/'.$resource.'/{id}', [$controller, 'destroy'])->whereNumber('id')->name($resource.'.destroy');
         }
-        Route::get('/stock',[ProductsController::class,'stock'])->name('stock');
-        Route::get('/orders',[OrdersController::class,'index'])->name('orders.index');
-        Route::post('/orders',[OrdersController::class,'store'])->name('orders.store');
-        Route::put('/orders/{id}/status',[OrdersController::class,'transition'])->whereNumber('id')->name('orders.status');
+        Route::get('/stock', [ProductsController::class, 'stock'])->name('stock');
+        Route::get('/orders', [OrdersController::class, 'index'])->name('orders.index');
+        Route::post('/orders', [OrdersController::class, 'store'])->name('orders.store');
+        Route::put('/orders/{id}/status', [OrdersController::class, 'transition'])->whereNumber('id')->name('orders.status');
     });
-    Route::middleware('can:buy')->group(function(){
-        Route::get('/cart',[CartController::class,'index'])->name('cart');
-        Route::post('/cart/{id}',[CartController::class,'add'])->whereNumber('id')->name('cart.add')->block();
-        Route::patch('/cart/{id}',[CartController::class,'update'])->whereNumber('id')->name('cart.update')->block();
-        Route::post('/checkout',[CartController::class,'checkout'])->name('checkout')->block();
-        Route::get('/orders',[BuyerOrdersController::class,'index'])->name('buyer.orders');
-        Route::delete('/orders/{id}',[OrdersController::class,'cancel'])->whereNumber('id')->name('buyer.orders.cancel');
+    Route::middleware('can:buy')->group(function () {
+        Route::get('/cart', [CartController::class, 'index'])->name('cart');
+        Route::post('/cart/{id}', [CartController::class, 'add'])->whereNumber('id')->name('cart.add')->block();
+        Route::patch('/cart/{id}', [CartController::class, 'update'])->whereNumber('id')->name('cart.update')->block();
+        Route::post('/checkout', [CartController::class, 'checkout'])->name('checkout')->block();
+        Route::get('/orders', [BuyerOrdersController::class, 'index'])->name('buyer.orders');
+        Route::delete('/orders/{id}', [OrdersController::class, 'cancel'])->whereNumber('id')->name('buyer.orders.cancel');
     });
-    Route::middleware('can:manage-users')->prefix('admin')->name('admin.')->group(function(){
-        Route::get('/users',[UsersController::class,'index'])->name('users.index');
-        Route::post('/users',[UsersController::class,'store'])->name('users.store');
-        Route::put('/users/{id}',[UsersController::class,'update'])->whereNumber('id')->name('users.update');
-        Route::delete('/users/{id}',[UsersController::class,'destroy'])->whereNumber('id')->name('users.destroy');
+    Route::middleware('can:manage-users')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/users', [UsersController::class, 'index'])->name('users.index');
+        Route::post('/users', [UsersController::class, 'store'])->name('users.store');
+        Route::put('/users/{id}', [UsersController::class, 'update'])->whereNumber('id')->name('users.update');
+        Route::delete('/users/{id}',[UsersController::class, 'destroy'])->whereNumber('id')->name('users.destroy');
     });
 });

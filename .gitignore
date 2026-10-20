@@ -1,8 +1,8 @@
 *.log
 .DS_Store
 .env
-.env.backup
-.env.production
+.env.*
+!.env.example
 .phpactor.json
 .phpunit.result.cache
 /.codex
@@ -26,8 +26,4 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 
-/frontend/node_modules/
-/frontend/test-results/
 /test-results/
-/.env.testing
-/.env.browser

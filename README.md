@@ -1,0 +1,92 @@
+# JamurTani — Desa Dlingo
+
+Laravel 13 application for mushroom sales and shared farm/livestock management. Blade renders all 17 pages; Vite bundles the original DOCX-inspired CSS and vanilla JavaScript. PHP owns authentication, validation, authorization and database writes. Node.js is only needed to build assets and run browser checks.
+
+## Local setup
+
+Requirements: PHP 8.3+ with PDO MySQL, mbstring, fileinfo and the standard Laravel extensions; Composer 2; Node.js 22.12+; MariaDB. This checkout uses the group's remote MariaDB through a local SSH tunnel. The web application still runs locally.
+
+```sh
+composer install
+cp .env.example .env
+php artisan key:generate
+npm ci
+```
+
+Enter the database password in the ignored `.env`. Keep `DB_HOST=127.0.0.1`, `DB_PORT=3307`, `DB_DATABASE=dlingo_jamur` and `DB_USERNAME=dlingo_app` for the existing group database. Open a tunnel in another terminal:
+
+```sh
+ssh -N -L 127.0.0.1:3307:127.0.0.1:3306 -p 52345 root@185.205.222.202
+```
+
+The database account needs privileges on the application database only. SSH and database passwords are separate and must stay outside Git. The current workstation is already configured locally.
+
+For the group's **existing eight-table database**, register its verified baseline before applying additions:
+
+```sh
+php artisan app:adopt-database
+php artisan migrate
+```
+
+For a completely empty MariaDB database, run `php artisan migrate` directly. The first migration recreates the original schema. Adoption rejects mismatched original columns and never imports or replaces existing records. Destructive Artisan resets and rollbacks are blocked for databases other than the isolated `dlingo_jamur_test`; normal forward migrations remain available.
+
+Optionally load reference records on an empty database:
+
+```sh
+php artisan db:seed --class=ReferenceSeeder
+php artisan storage:link
+npm run build
+php artisan serve --host=127.0.0.1 --port=8000
+```
+
+Open http://127.0.0.1:8000. The seeder skips all reference data if any domain table already contains records. `storage:link` is needed for uploaded product photos, including when seeding is skipped. During development, run `npm run dev` alongside the PHP server for asset updates.
+
+## Reference accounts
+
+These accounts exist only when the reference seed was applied. Password: `demo12345`.
+
+| Role | Username | Email |
+| --- | --- | --- |
+| Administrator | `superadmin` | `admin@dlingo.test` |
+| Farm staff (Budi) | `admin` | `budi@example.com` |
+| Buyer | `pembeli` | `andi@dlingo.test` |
+
+Budi's username follows the DOCX. Actual permissions use `role`, not the username. Public registration always creates a buyer and a linked customer contact. Administrators create other staff/admin accounts. Livestock caretakers are separate contact records and do not automatically receive login accounts.
+
+## Behavior and pages
+
+| Area | Routes |
+| --- | --- |
+| Public | `/`, `/products/{id}`, `/login`, `/register` |
+| Dashboards | `/dashboard/petani`, `/dashboard/admin`, `/dashboard/pembeli` |
+| Farm management | `/manage/products`, `/manage/buyers`, `/manage/stock`, `/manage/orders`, `/manage/livestock`, `/manage/caretakers` |
+| Buyer | `/cart`, `/orders` |
+| Account/admin | `/profile`, `/admin/users` |
+
+Admins and farm staff manage **one shared farm**, regardless of who created a record. Buyers can see and cancel only their own linked orders, including orders entered for them by staff. Prices and stock are rechecked in the database at checkout. Cart contents are private to the logged-in buyer's session and do not reserve stock.
+
+Orders follow `menunggu → dikonfirmasi → diproses → dikirim → selesai`. Farm staff may cancel an open order; buyers may cancel their own waiting or confirmed orders. Transactions and row locks prevent overselling and repeated stock restoration. Only completed orders count as farm revenue. Order lines preserve the purchased name, unit and price.
+
+Bank/contact information belongs to the farm and is edited by admins from Profile → Rekening. Payment is a manual transfer; confirmation and delivery are arranged with the farm. There is no payment gateway or automatic payment verification. Product photos are stored on Laravel's public disk (JPEG/PNG/WebP, max 2 MB). The dashboard's Upload File action remains a local preview, matching the prototype.
+
+Referenced products/customers cannot be deleted. Livestock/caretakers are archived and their composite-key contract history is retained. Removing an account deactivates it and invalidates its sessions while preserving business records.
+
+The nine pictured DOCX screens retain the reference navigation, blue banners, heavy borders, shadows, summary cards and tables. Remaining pages and mobile layouts continue that design. The superseded Express backend and browser-local demo store have been removed; historical commits remain available.
+
+## Verification
+
+Create a separate `dlingo_jamur_test` MariaDB database and grant the test user access. Copy `.env` to ignored `.env.testing`, set `APP_ENV=testing`, `DB_DATABASE=dlingo_jamur_test`, clear `DB_URL`, and retain the correct tunnel/credentials. Do not run the different test commands concurrently: they share the isolated test database.
+
+```sh
+php tests/prepare-database.php
+php artisan test
+php tests/concurrency.php
+npm run build
+npm run test:browser
+```
+
+All test entry points verify the exact database name before writing. The preparation and browser commands recreate **only `dlingo_jamur_test`**. Feature tests use rollback transactions. The concurrency check starts independent PHP workers for last-item checkout and simultaneous cancellation. Browser checks start/stop their own PHP server, exercise actual CSRF and database sessions, cover all 17 pages at desktop/mobile sizes, upload a photo, and test farm/admin/buyer workflows. Screenshots and HTTP logs are in ignored `test-results/`.
+
+Browser tests use `/usr/bin/chromium` by default; set `CHROMIUM_PATH` to another installed Chromium executable. `BROWSER_PORT` defaults to 8123. The temporary `.env.browser` file is ignored and removed after the run.
+
+See [database notes](docs/database.md) for schema mappings and migration details. This branch prepares the local application and remote database; web-server deployment is a separate step.
