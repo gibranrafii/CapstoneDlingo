@@ -5,7 +5,7 @@ const path = require('path');
 const { authenticate, authorize } = require('../middleware/auth');
 const {
   getAllProducts, getAllProductsManage, getProductById,
-  createProduct, updateProduct, deleteProduct, getCategories
+  createProduct, updateProduct, deleteProduct, getCategories, updateStock
 } = require('../controllers/productController');
 
 // Multer setup
@@ -34,6 +34,7 @@ router.get('/manage', authenticate, authorize('petani', 'admin'), getAllProducts
 router.get('/:id', getProductById);
 router.post('/', authenticate, authorize('petani', 'admin'), upload.single('gambar'), createProduct);
 router.put('/:id', authenticate, authorize('petani', 'admin'), upload.single('gambar'), updateProduct);
+router.patch('/:id/stok', authenticate, authorize('petani', 'admin'), updateStock);
 router.delete('/:id', authenticate, authorize('petani', 'admin'), deleteProduct);
 
 module.exports = router;

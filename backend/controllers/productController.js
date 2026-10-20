@@ -10,7 +10,7 @@ const getAllProducts = async (req, res) => {
     let query = `
       SELECT p.*, u.nama AS nama_petani, u.no_rekening, u.nama_bank, u.no_telepon AS telepon_petani
       FROM product p
-      JOIN users u ON p.id_user = u.id_user
+      JOIN `user` u ON p.id_user = u.id_user
       WHERE p.stok > 0
     `;
     const params = [];
@@ -56,7 +56,7 @@ const getAllProductsManage = async (req, res) => {
     let query = `
       SELECT p.*, u.nama AS nama_petani
       FROM product p
-      JOIN users u ON p.id_user = u.id_user
+      JOIN `user` u ON p.id_user = u.id_user
     `;
     const params = [];
 
@@ -81,7 +81,7 @@ const getProductById = async (req, res) => {
     const [products] = await db.query(
       `SELECT p.*, u.nama AS nama_petani, u.no_rekening, u.nama_bank, u.no_telepon AS telepon_petani, u.email AS email_petani
        FROM product p
-       JOIN users u ON p.id_user = u.id_user
+       JOIN `user` u ON p.id_user = u.id_user
        WHERE p.id_produk = ?`,
       [req.params.id]
     );
@@ -103,6 +103,10 @@ const createProduct = async (req, res) => {
 
     if (!nama_produk || !harga) {
       return res.status(400).json({ success: false, message: 'Nama produk dan harga wajib diisi.' });
+    }
+
+    if (parseFloat(harga) < 0 || parseInt(stok || 0) < 0) {
+      return res.status(400).json({ success: false, message: 'Harga dan stok tidak boleh negatif.' });
     }
 
     const gambar = req.file ? `/uploads/${req.file.filename}` : null;
@@ -141,7 +145,7 @@ const updateProduct = async (req, res) => {
       'UPDATE product SET nama_produk = ?, deskripsi = ?, harga = ?, satuan = ?, kategori = ?, stok = ?, gambar = ? WHERE id_produk = ?',
       [nama_produk || products[0].nama_produk, deskripsi ?? products[0].deskripsi,
        parseFloat(harga) || products[0].harga, satuan || products[0].satuan,
-       kategori || products[0].kategori, parseInt(stok) ?? products[0].stok, gambar, id]
+       kategori || products[0].kategori, stok === undefined || stok === '' ? products[0].stok : parseInt(stok), gambar, id]
     );
 
     return res.status(200).json({ success: true, message: 'Produk berhasil diperbarui.' });
@@ -189,4 +193,36 @@ const getCategories = async (req, res) => {
   }
 };
 
-module.exports = { getAllProducts, getAllProductsManage, getProductById, createProduct, updateProduct, deleteProduct, getCategories };
+// PATCH /api/products/:id/stok - petani memperbarui stok mandiri (FR-05)
+// body: { stok } untuk set nilai absolut, atau { tambah } untuk +/- relatif
+const updateStock = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { stok, tambah } = req.body;
+
+    const [products] = await db.query('SELECT * FROM product WHERE id_produk = ?', [id]);
+    if (products.length === 0) {
+      return res.status(404).json({ success: false, message: 'Produk tidak ditemukan.' });
+    }
+    if (req.user.role === 'petani' && products[0].id_user !== req.user.id) {
+      return res.status(403).json({ success: false, message: 'Anda tidak berhak mengubah stok produk ini.' });
+    }
+
+    let newStok;
+    if (stok !== undefined) newStok = parseInt(stok);
+    else if (tambah !== undefined) newStok = products[0].stok + parseInt(tambah);
+    else return res.status(400).json({ success: false, message: 'Isi "stok" atau "tambah".' });
+
+    if (Number.isNaN(newStok) || newStok < 0) {
+      return res.status(400).json({ success: false, message: 'Stok tidak valid (harus bilangan >= 0).' });
+    }
+
+    await db.query('UPDATE product SET stok = ? WHERE id_produk = ?', [newStok, id]);
+    return res.status(200).json({ success: true, message: 'Stok berhasil diperbarui.', stok: newStok });
+  } catch (error) {
+    console.error('UpdateStock error:', error);
+    return res.status(500).json({ success: false, message: 'Terjadi kesalahan server.' });
+  }
+};
+
+module.exports = { updateStock, getAllProducts, getAllProductsManage, getProductById, createProduct, updateProduct, deleteProduct, getCategories };
