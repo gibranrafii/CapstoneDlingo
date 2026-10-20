@@ -22,3 +22,11 @@ setTimeout(()=>document.querySelector('.toast-region')?.remove(),5000);
 
 const newPassword=document.querySelector('#profile-form [name=password]');
 if(newPassword){const current=document.getElementById('current-password-field');const sync=()=>{current.hidden=!newPassword.value;current.querySelector('input').required=!!newPassword.value;};newPassword.addEventListener('input',sync);sync();}
+
+const showOrder=async url=>{
+  try{const response=await fetch(url,{headers:{'X-Requested-With':'XMLHttpRequest'}});if(response.status===401||response.redirected){location.href='/login';return;}if(!response.ok||response.headers.get('X-Dlingo-Order')!=='1')throw Error('Pesanan tidak dapat ditampilkan.');document.getElementById('order-detail-body').innerHTML=await response.text();openDialog(document.getElementById('order-detail'));}
+  catch(error){const el=document.createElement('div');el.className='toast-region';el.setAttribute('role','alert');const message=document.createElement('div');message.className='toast-message error';message.textContent=error.message;el.append(message);document.body.append(el);setTimeout(()=>el.remove(),4500);}
+};
+document.addEventListener('click',event=>{const order=event.target.closest('[data-order]');if(order){event.preventDefault();showOrder(order.href);}});
+if(document.body.dataset.orderAuto)showOrder(document.body.dataset.orderAuto);
+document.querySelectorAll('[data-customer-address]').forEach(select=>select.addEventListener('change',()=>{select.closest('form').querySelector('[name=alamat_kirim]').value=select.selectedOptions[0]?.dataset.address||'';}));

@@ -1,7 +1,7 @@
 @props(['page','title','shell'=>'app'])
 @php $ui=\App\Support\Ui::class; @endphp
 <!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0047ab"><meta name="csrf-token" content="{{ csrf_token() }}"><title>{{ $title }} — Desa Dlingo</title>@vite(['resources/css/app.css','resources/js/app.js'])</head>
-<body data-page="{{ $page }}" data-reopen="{{ old('_modal') }}" class="{{ $shell==='auth'?'auth-page':'' }}"><a class="skip-link" href="#app-main">Lewati ke konten utama</a><div class="top-band"></div>
+<body data-page="{{ $page }}" data-reopen="{{ old('_modal') }}" data-order-auto="{{ request()->integer('order')>0?route('orders.show',request()->integer('order')):'' }}" class="{{ $shell==='auth'?'auth-page':'' }}"><a class="skip-link" href="#app-main">Lewati ke konten utama</a><div class="top-band"></div>
 @if($shell==='store')
 <nav class="store-header" aria-label="Navigasi utama"><a class="brand" href="{{ route('store') }}"><span class="brand-icon">{{ $ui::icon('mushroom') }}</span>JamurTani</a><div class="store-links"><a class="nav-link" href="{{ route('store') }}">Katalog</a>@auth<a class="button small" href="{{ route('dashboard') }}">{{ $ui::icon('home') }}Dashboard</a>@can('buy')<a class="button small white" href="{{ route('cart') }}">{{ $ui::icon('cart') }}Keranjang</a>@endcan @else<a class="button small secondary" href="{{ route('login') }}">{{ $ui::icon('login') }}Masuk</a><a class="button small" href="{{ route('register') }}">Daftar</a>@endauth</div></nav>
 @elseif($shell==='app')
@@ -15,6 +15,7 @@ $navs=auth()->user()?->role==='pembeli'?[['Home','dashboard','home'],['Produk','
 @if($shell==='store')<footer class="site-footer"><strong>{{ $farm->nama }}</strong><br>Jamur pilihan dari petani. Tumbuh bersama masyarakat lokal.</footer>@endif
 @if(session('success')||session('error'))<div class="toast-region" role="status" aria-live="polite"><div class="toast-message {{ session('error')?'error':'' }}">{{ session('success')??session('error') }}</div></div>@endif
 @auth
+<x-dialog id="order-detail" title="Detail Pesanan"><div id="order-detail-body"></div></x-dialog>
 <x-dialog id="bank" title="Rekening Pembayaran" :action="auth()->user()->role==='admin'?route('farm.update'):null">
 @if(auth()->user()->role==='admin')
 <x-field form="bank" name="nama" label="Nama Usaha" :value="$farm->nama" required/><x-field form="bank" name="alamat" label="Alamat" :value="$farm->alamat"/>
