@@ -178,6 +178,9 @@ const deleteProduct = async (req, res) => {
     await db.query('DELETE FROM product WHERE id_produk = ?', [id]);
     return res.status(200).json({ success: true, message: 'Produk berhasil dihapus.' });
   } catch (error) {
+    if (error.code === 'ER_ROW_IS_REFERENCED_2') {
+      return res.status(409).json({ success: false, message: 'Produk sudah pernah dipesan dan tidak dapat dihapus. Set stok ke 0 sebagai gantinya.' });
+    }
     console.error('DeleteProduct error:', error);
     return res.status(500).json({ success: false, message: 'Terjadi kesalahan server.' });
   }
