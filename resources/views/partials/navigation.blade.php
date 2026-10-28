@@ -21,7 +21,7 @@
 <header class="workspace-header"><a class="brand mobile-brand" href="{{ route('dashboard') }}"><span class="brand-icon">{{ $ui::icon('mushroom') }}</span>JamurTani</a><span class="workspace-title">{{ $title }}</span><a class="account-link" href="{{ route('profile') }}"><span class="avatar">{{ mb_substr(auth()->user()->nama,0,1) }}</span><span class="account-name">{{ auth()->user()->nama }}<small>{{ auth()->user()->role==='admin'?'Administrator':'Petani' }}</small></span></a></header>
 <nav class="bottom-nav" aria-label="Navigasi seluler">
     @foreach($staffNav as [$label,$route,$icon,$pages])<a class="nav-link {{ $isActive($pages)?'active':'' }}" @if($isActive($pages)) aria-current="page" @endif href="{{ route($route) }}">{{ $ui::icon($icon) }}<span>{{ $label }}</span></a>@endforeach
-    <button class="nav-link {{ in_array($page,['buyers','stock','staff','profile','users'])?'active':'' }}" type="button" data-open="staff-more" aria-haspopup="dialog">{{ $ui::icon('menu') }}<span>Lainnya</span></button>
+    <button class="nav-link {{ in_array($page,['buyers','stock','staff','profile','users'])?'active':'' }}" @if(in_array($page,['buyers','stock','staff','profile','users'])) aria-current="page" @endif type="button" data-open="staff-more" aria-haspopup="dialog">{{ $ui::icon('menu') }}<span>Lainnya</span></button>
 </nav>
 <x-dialog id="staff-more" title="Menu Lainnya"><nav class="more-menu" aria-label="Menu lainnya">
     @foreach($extraNav as [$label,$route,$icon,$pages])<a class="nav-link" href="{{ route($route) }}">{{ $ui::icon($icon) }}{{ $label }}</a>@endforeach

@@ -19,7 +19,14 @@ class DashboardController extends Controller
         $herd = Livestock::selectRaw("COUNT(*) total,SUM(kategori_ternak='Sapi') cattle,SUM(kategori_ternak='Kambing') goats")->first();
         $orders = Order::selectRaw("COUNT(*) total,COALESCE(SUM(CASE WHEN status='selesai' THEN total_harga ELSE 0 END),0) income")->first();
 
-        return compact('herd', 'orders') + ['pendingOrders' => Order::where('status', 'menunggu')->count(), 'recentOrders' => Order::with('buyer')->latest('id_pesanan')->limit(5)->get(), 'lowStock' => Product::where('stok', '<', 10)->orderBy('stok')->orderBy('id_produk')->limit(3)->get(), 'products' => Product::count(), 'caretakers' => Caretaker::where('is_active', true)->count(), 'activities' => DB::table('activity_logs')->latest('id')->limit(3)->get()];
+        return compact('herd', 'orders') + [
+            'pendingOrders' => Order::where('status', 'menunggu')->count(),
+            'recentOrders' => Order::with('buyer')->latest('id_pesanan')->limit(5)->get(),
+            'lowStock' => Product::where('stok', '<', 10)->orderBy('stok')->orderBy('id_produk')->limit(3)->get(),
+            'products' => Product::count(),
+            'caretakers' => Caretaker::where('is_active', true)->count(),
+            'activities' => DB::table('activity_logs')->latest('id')->limit(3)->get(),
+        ];
     }
 
     public function farmer()

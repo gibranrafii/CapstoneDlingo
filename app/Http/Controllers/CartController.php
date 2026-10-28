@@ -41,6 +41,6 @@ class CartController extends Controller
         $order = $orders->create($r->user(), $buyer->id_pembeli, $cart->quantities($r), $data['alamat_kirim'], $data['catatan'] ?? null);
         $cart->clear($r);
 
-        return redirect()->route('buyer.orders', ['order' => $order->id_pesanan])->with('success','Pesanan berhasil dibuat. Silakan transfer ke rekening petani.');
+        return redirect()->route('buyer.orders', ['order' => $order->id_pesanan])->with('success', 'Pesanan berhasil dibuat. Silakan transfer ke rekening petani.');
     }
 }

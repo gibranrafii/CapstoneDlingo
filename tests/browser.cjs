@@ -17,11 +17,11 @@ const pages = [
   ['/dashboard/admin','admin'],['/admin/users','admin']
 ];
 (async () => {
-  let server, browser;
+  let server, browser, currentPage;
   const errors = [], contexts = {};
   let checks = 0;
   const ok = message => console.log(`PASS ${++checks}: ${message}`);
-  const go = (page, route) => page.goto(base + route);
+  const go = (page, route) => { currentPage = page; return page.goto(base + route); };
   const token = page => page.locator('meta[name=csrf-token]').getAttribute('content');
   async function fresh() {
     const context = await browser.newContext({viewport:{width:1584,height:900}});
@@ -83,6 +83,55 @@ const pages = [
       await page.setViewportSize({width:1584,height:900});
     }
     ok('All 17 pages render on desktop and mobile without overflow');
+    // Check the responsive shells themselves, not only absence of body overflow.
+    for(const role of ['petani','admin','pembeli','guest']) {
+      const page=contexts[role].page;
+      const route={petani:'/manage/stock',admin:'/admin/users',pembeli:'/dashboard/pembeli',guest:'/'}[role];
+      for(const width of [320,768,1024]) {
+        await page.setViewportSize({width,height:844});await go(page,route);
+        assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`${role}: overflow at ${width}px`);
+        const mobile=width<1024;
+        assert.equal(await page.locator('.bottom-nav').isVisible(),mobile);
+        if(role==='petani'||role==='admin') {
+          assert.equal(await page.locator('.sidebar').isVisible(),!mobile);
+          if(mobile) {
+            const more=page.locator('.bottom-nav [data-open=staff-more]');
+            await more.click();
+            assert.equal(await page.locator('#staff-more').evaluate(d=>d.open),true);
+            assert.equal(await page.locator('#staff-more').getByRole('link',{name:'Kelola Pengguna',exact:true}).count(),role==='admin'?1:0);
+            await page.keyboard.press('Escape');
+            assert.equal(await more.evaluate(el=>el===document.activeElement),true);
+            await more.click();await page.locator('#staff-more [data-open=bank]').click();
+            assert.equal(await page.locator('dialog[open]').count(),1);
+            assert.equal(await page.locator('#bank').evaluate(d=>d.open),true);
+            for(let tab=0;tab<3;tab++) {
+              await page.keyboard.press('Tab');
+              assert.equal(await page.locator('#bank').evaluate(d=>d.contains(document.activeElement)),true,'Dialog traps keyboard focus');
+            }
+            if(role==='admin') {
+              const saveBank=page.locator('#bank button[type=submit]');
+              await saveBank.scrollIntoViewIfNeeded();
+              const target=await saveBank.boundingBox();
+              assert.ok(target.y>=0&&target.y+target.height<=844,'Long dialog submit remains reachable');
+            }
+
+            await page.keyboard.press('Escape');
+            assert.equal(await more.evaluate(el=>el===document.activeElement),true);
+          }
+        }
+        if(mobile) {
+          const targets=await page.locator('.bottom-nav .nav-link').evaluateAll(els=>els.map(el=>({w:el.getBoundingClientRect().width,h:el.getBoundingClientRect().height})));
+          assert.ok(targets.every(r=>r.w>=44&&r.h>=44),'Bottom navigation touch targets');
+        }
+      }
+      await page.setViewportSize({width:1584,height:900});
+    }
+    const guest=contexts.guest.page;
+    await go(guest,'/?q=NoMatchingProduct987');assert.match(await guest.locator('main').innerText(),/Produk tidak ditemukan/);
+    await go(contexts.pembeli.page,'/orders');assert.match(await contexts.pembeli.page.locator('main').innerText(),/Belum Ada Pesanan/);
+    await go(contexts.pembeli.page,'/cart');assert.match(await contexts.pembeli.page.locator('main').innerText(),/Keranjang Anda Kosong/);
+    ok('Responsive navigation, role menus, Escape/focus restoration, and empty states');
+
     const {page:staff,context:staffContext}=contexts.petani;
     const {page:buyer}=contexts.pembeli;
     const {page:admin}=contexts.admin;
@@ -101,9 +150,40 @@ const pages = [
     await staff.reload();assert.match(await staff.locator('tbody tr').filter({hasText:'Browser Mushroom'}).innerText(),/12/);
     await go(staff,'/?q=Browser');await staff.getByRole('link',{name:'Detail',exact:true}).click();
     const image=staff.locator('.detail-layout img');await image.waitFor();assert.equal(await image.evaluate(img=>img.complete&&img.naturalWidth>0),true);
+    const photoUrl=await image.getAttribute('src');
+    await staff.route(photoUrl,route=>route.fulfill({status:200,contentType:'image/png',body:'invalid-image'}));
+    await staff.reload();
+    await staff.locator('.detail-layout .photo-placeholder:not([hidden])').waitFor();
+    assert.equal(await staff.locator('.detail-layout img').isVisible(),false);
+    await staff.unroute(photoUrl);
     await go(staff,'/manage/products');await staff.getByRole('button',{name:'Hapus Browser Mushroom',exact:true}).click();await save(staff,'Hapus');
     assert.equal(await staff.locator('tbody tr').count(),3);
     ok('Product create/edit/delete, uploaded image serving, and reload persistence');
+    const longName='Browser product '+('NamaProdukPanjang'.repeat(10));
+    await staff.locator('[data-open=product-new]').click();
+    await dialog(staff).locator('[name=nama_produk]').fill(longName);
+    await dialog(staff).locator('[name=harga]').fill('1000');
+    await dialog(staff).locator('[name=stok]').fill('1');await save(staff);
+    await go(contexts.pembeli.page,'/?q=Browser');
+    await contexts.pembeli.page.setViewportSize({width:320,height:844});
+    assert.ok(await contexts.pembeli.page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Long product names fit mobile cards');
+    await contexts.pembeli.page.getByRole('button',{name:'Tambah ke keranjang',exact:true}).click();
+    await go(staff,'/manage/products');await staff.getByRole('button',{name:'Edit '+longName,exact:true}).click();
+    await dialog(staff).locator('[name=stok]').fill('0');await save(staff);
+    const stockBuyer=contexts.pembeli.page;
+    await go(stockBuyer,'/cart');assert.match(await stockBuyer.locator('main').innerText(),/Stok tersedia: 0/);
+    await stockBuyer.locator('[name=alamat_kirim]').fill('Dlingo');
+    await submit(stockBuyer,stockBuyer.getByRole('button',{name:'Buat Pesanan',exact:true}));
+    assert.equal(new URL(stockBuyer.url()).pathname,'/cart');
+    assert.match(await stockBuyer.locator('.cart-item').innerText(),new RegExp('Browser product'));
+    await submit(stockBuyer,stockBuyer.getByRole('button',{name:'Hapus '+longName,exact:true}));
+    await go(stockBuyer,'/?q=Browser');assert.equal(await stockBuyer.getByRole('button',{name:'Stok habis',exact:true}).isDisabled(),true);
+    await stockBuyer.getByRole('link',{name:'Detail',exact:true}).click();
+    assert.equal(await stockBuyer.getByRole('button',{name:'Stok Habis',exact:true}).isDisabled(),true);
+    await go(staff,'/manage/products');await staff.getByRole('button',{name:'Hapus '+longName,exact:true}).click();await save(staff,'Hapus');
+    await stockBuyer.setViewportSize({width:1584,height:900});
+    ok('Missing photo fallback, long names, sold-out products, and stale-stock checkout');
+
 
     await go(staff,'/manage/buyers');await staff.locator('[data-open=buyer-new]').first().click();await dialog(staff).locator('[name=nama_pembeli]').fill('Browser Customer');await save(staff);
     await staff.getByRole('button',{name:'Hapus Browser Customer',exact:true}).click();await save(staff,'Hapus');
@@ -114,10 +194,36 @@ const pages = [
     await go(staff,'/manage/livestock');assert.doesNotMatch(await staff.locator('tbody tr').filter({hasText:'Sapi Brahman'}).innerText(),/Browser Caretaker/);
     ok('Buyer contacts and livestock caretaker assignment/archive');
 
+    for(const width of [320,390]) {
+      await buyer.setViewportSize({width,height:844});await go(buyer,'/products/1');
+      const bar=buyer.locator('.purchase-bar');const nav=buyer.locator('.bottom-nav');
+      for(const scroll of [0,10000]) {
+        await buyer.evaluate(y=>scrollTo(0,y),scroll);
+        const action=await bar.boundingBox(), bottom=await nav.boundingBox();
+        assert.ok(action.y>=0&&action.y+action.height<=bottom.y+1,'Product action above mobile navigation');
+        assert.ok(await buyer.getByRole('button',{name:'Tambah ke Keranjang',exact:true}).isVisible());
+      }
+    }
+    await buyer.setViewportSize({width:1584,height:900});
     await go(buyer,'/products/1');await buyer.locator('[name=quantity]').fill('2');await submit(buyer,buyer.getByRole('button',{name:'Tambah ke Keranjang',exact:true}));
     await go(buyer,'/cart');assert.match(await buyer.locator('.summary-line.total').innerText(),/30.000/);
     await Promise.all([buyer.waitForNavigation(),buyer.getByRole('button',{name:'Tambah Jamur Tiram',exact:true}).click()]);
     assert.match(await buyer.locator('.summary-line.total').innerText(),/45.000/);
+    for(const width of [320,390,768]) {
+      await buyer.setViewportSize({width,height:844});
+      const action=await buyer.locator('.purchase-bar').boundingBox(), nav=await buyer.locator('.bottom-nav').boundingBox();
+      assert.ok(action.y>=0&&action.y+action.height<=nav.y+1,'Checkout above mobile navigation');
+      assert.equal(await buyer.locator('main table').count(),0,'Mobile cart uses cards');
+      await buyer.locator('[name=catatan]').focus();
+      await buyer.locator('[name=catatan]').fill('Browser delivery note');
+      await buyer.locator('[name=catatan]').scrollIntoViewIfNeeded();
+      const field=await buyer.locator('[name=catatan]').boundingBox();
+      assert.ok(field.y+field.height<=action.y,'Focused checkout field remains above fixed controls');
+      await buyer.evaluate(()=>scrollTo(0,document.body.scrollHeight));
+      const last=await buyer.locator('main').evaluate(el=>el.getBoundingClientRect().bottom);
+      assert.ok(last<=action.y+1,'Final checkout content clears fixed controls');
+    }
+    await buyer.setViewportSize({width:1584,height:900});
     await buyer.locator('[name=alamat_kirim]').fill('Browser delivery address');
     await submit(buyer,buyer.getByRole('button',{name:'Buat Pesanan',exact:true}));
     await buyer.waitForURL('**/orders?order=*');await buyer.locator('#order-detail[open]').waitFor();
@@ -162,6 +268,12 @@ const pages = [
     ok('Buyer registration, cross-account privacy, profile persistence and logout');
     assert.deepEqual(errors,[],'Unexpected browser errors');
     ok('No JavaScript errors or failed page resources');
+    await fs.unlink(path.join(artifacts,'failure.png')).catch(()=>{});
+  } catch(error) {
+    if(currentPage && !currentPage.isClosed()) {
+      await currentPage.screenshot({path:path.join(artifacts,'failure.png'),fullPage:true}).catch(()=>{});
+    }
+    throw error;
   } finally {
     if(browser)await browser.close();
     if(server?.pid){try{process.kill(-server.pid,'SIGTERM');}catch{}}

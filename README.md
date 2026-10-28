@@ -1,6 +1,6 @@
 # JamurTani — Desa Dlingo
 
-Laravel 13 application for mushroom sales and shared farm/livestock management. Blade renders all 17 pages; Vite bundles the original DOCX-inspired CSS and vanilla JavaScript. PHP owns authentication, validation, authorization and database writes. Node.js is only needed to build assets and run browser checks.
+Laravel 13 application for mushroom sales and shared farm/livestock management. Blade renders all 17 pages; Vite bundles the shared responsive CSS and vanilla JavaScript. PHP owns authentication, validation, authorization and database writes. Node.js is only needed to build assets and run browser checks.
 
 ## Local setup
 
@@ -71,7 +71,11 @@ Bank/contact information belongs to the farm and is edited by admins from Profil
 
 Referenced products/customers cannot be deleted. Livestock/caretakers are archived and their composite-key contract history is retained. Removing an account deactivates it and invalidates its sessions while preserving business records.
 
-The nine pictured DOCX screens retain the reference navigation, blue banners, heavy borders, shadows, summary cards and tables. Remaining pages and mobile layouts continue that design. The superseded Express backend and browser-local demo store have been removed; historical commits remain available.
+The UI follows the SideSketch proposal in `docs/design/jamurtani-ui.ldv.json`: restrained blue/white surfaces, subtle borders, and product-first shopping pages. Staff use a sidebar from 1024px upward and Home/Produk/Pesanan/Ternak/Lainnya bottom navigation below that breakpoint. The Lainnya menu exposes the remaining role-appropriate tools. Shopping pages use top navigation on desktop and Home/Produk/Pesanan/Keranjang/Profil bottom navigation on smaller screens. Catalog cards use one column below 640px, two below 1024px, and three above.
+
+Buyer Home shows pending orders, the session cart, and three products ordered by name. Farmer/admin dashboards use live counts, low-stock warnings (under 10), five latest orders, and three latest activities. Product detail and checkout keep primary controls above mobile navigation, with safe-area and content clearance. Uploaded product photos remain supported; absent or failed photos show neutral placeholders. Payment remains a manual bank transfer.
+
+The superseded Express backend and browser-local demo store have been removed; historical commits remain available.
 
 ## Verification
 
@@ -85,7 +89,7 @@ npm run build
 npm run test:browser
 ```
 
-All test entry points verify the exact database name before writing. The preparation and browser commands recreate **only `dlingo_jamur_test`**. Feature tests use rollback transactions. The concurrency check starts independent PHP workers for last-item checkout and simultaneous cancellation. Browser checks start/stop their own PHP server, exercise actual CSRF and database sessions, cover all 17 pages at desktop/mobile sizes, upload a photo, and test farm/admin/buyer workflows. Screenshots and HTTP logs are in ignored `test-results/`.
+All test entry points verify the exact database name before writing. The preparation and browser commands recreate **only `dlingo_jamur_test`**. Feature tests use rollback transactions. The concurrency check starts independent PHP workers for last-item checkout and simultaneous cancellation. Browser checks start/stop their own PHP server, exercise actual CSRF and database sessions, cover all 17 pages at desktop/mobile sizes, upload a photo, and test farm/admin/buyer workflows. HTTP logs and a screenshot of the failing page are stored in ignored `test-results/`. Routine screenshots are disabled; opt in with `BROWSER_SCREENSHOTS=1 npm run test:browser`. Browser checks also cover 320px/768px/1024px navigation, role menus, dialog focus restoration, fixed purchase controls, missing photos, long names, sold-out products, and stale-stock checkout.
 
 Browser tests use `/usr/bin/chromium` by default; set `CHROMIUM_PATH` to another installed Chromium executable. `BROWSER_PORT` defaults to 8123. The temporary `.env.browser` file is ignored and removed after the run.
 

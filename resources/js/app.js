@@ -14,6 +14,18 @@ document.addEventListener('click', event => {
   const step=event.target.closest('[data-step]');if(step){const form=step.closest('form'),input=form.querySelector('[name=quantity]');const next=Number(input.value)+Number(step.dataset.step);if(next>=Number(input.min)&&next<=Number(input.max)){input.value=next;form.requestSubmit();}}
 });
 document.querySelectorAll('dialog').forEach(dialog=>{
+  dialog.addEventListener('keydown', event => {
+    if (event.key !== 'Tab') return;
+    const targets = [...dialog.querySelectorAll('a[href],button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),[tabindex]')]
+      .filter(el => el.tabIndex >= 0 && el.getClientRects().length);
+    const first = targets[0], last = targets.at(-1);
+    if (!first) { event.preventDefault(); dialog.focus(); return; }
+    if (event.shiftKey && (document.activeElement === first || !targets.includes(document.activeElement))) {
+      event.preventDefault(); last.focus();
+    } else if (!event.shiftKey && (document.activeElement === last || !targets.includes(document.activeElement))) {
+      event.preventDefault(); first.focus();
+    }
+  });
   dialog.addEventListener('close',()=>{dialog.returnFocus?.isConnected&&dialog.returnFocus.focus();});
   dialog.addEventListener('click',event=>{if(event.target!==dialog)return;const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();});
 });
@@ -22,8 +34,8 @@ document.querySelectorAll('[data-preview]').forEach(input=>input.addEventListene
   const info=document.createElement('div');info.className='upload-meta';info.textContent=`${file.name} · ${(file.size/1024).toFixed(1)} KB`;preview.append(info);
   if(file.type.startsWith('image/')){const url=URL.createObjectURL(file);urls.set(input,url);const img=document.createElement('img');img.className='file-preview';img.src=url;img.alt=file.name;preview.append(img);}
 }));
-document.addEventListener('submit',event=>{if(event.target.checkValidity()){event.target.querySelectorAll('button[type=submit]').forEach(button=>button.disabled=true);}});
-window.addEventListener('pageshow',()=>document.querySelectorAll('button[type=submit]').forEach(button=>button.disabled=false));
+document.addEventListener('submit',event=>{if(event.target.checkValidity()){event.target.querySelectorAll('button[type=submit]:not(:disabled)').forEach(button=>{button.dataset.submitting='true';button.disabled=true;});}});
+window.addEventListener('pageshow',()=>document.querySelectorAll('button[data-submitting]').forEach(button=>{button.disabled=false;delete button.dataset.submitting;}));
 if(document.body.dataset.reopen)openDialog(document.getElementById(document.body.dataset.reopen));
 setTimeout(()=>document.querySelector('.toast-region')?.remove(),5000);
 

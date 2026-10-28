@@ -6,7 +6,7 @@
 @endphp
 <!doctype html>
 <html lang="id">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0047ab"><meta name="csrf-token" content="{{ csrf_token() }}"><title>{{ $title }} — Desa Dlingo</title>@vite(['resources/css/app.css','resources/js/app.js'])</head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content"><meta name="theme-color" content="#0047ab"><meta name="csrf-token" content="{{ csrf_token() }}"><title>{{ $title }} — Desa Dlingo</title>@vite(['resources/css/app.css','resources/js/app.js'])</head>
 <body data-page="{{ $page }}" data-reopen="{{ old('_modal') }}" data-order-auto="{{ request()->integer('order')>0?route('orders.show',request()->integer('order')):'' }}" class="{{ $shell==='auth'?'auth-page':($staffShell?'staff-page':'shopping-page') }}">
 <a class="skip-link" href="#app-main">Lewati ke konten utama</a>
 @if($shell !== 'auth')
