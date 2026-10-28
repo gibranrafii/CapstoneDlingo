@@ -6,6 +6,7 @@ use App\Models\Buyer;
 use App\Models\User;
 use App\Rules\PasswordBytes;
 use App\Services\Activity;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -70,6 +71,7 @@ class AuthController extends Controller
 
             return $user;
         });
+        event(new Registered($user));
         Auth::login($user);
         $request->session()->regenerate();
 

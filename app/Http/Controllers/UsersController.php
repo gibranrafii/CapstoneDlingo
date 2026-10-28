@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Rules\PasswordBytes;
 use App\Services\Activity;
+use App\Services\SecurityEvent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -42,7 +43,13 @@ class UsersController extends Controller
         if (empty($data['password'])) {
             unset($data['password']);
         }
-        DB::transaction(function () use ($user, $data, $r) {
+        $emailChanged = ! $user->exists || $data['email'] !== $user->email;
+        $oldEmail = $user->email;
+        $oldRole = $user->role;
+        if ($emailChanged) {
+            $data['email_verified_at'] = null;
+        }
+        DB::transaction(function () use ($user, $data, $r, $emailChanged, $oldEmail, $oldRole) {
             $user->fill($data)->save();
             if ($user->role === 'pembeli') {
                 $buyer = $user->buyer()->firstOrNew();
@@ -52,12 +59,23 @@ class UsersController extends Controller
                 }
                 $buyer->save();
             }
-            if (isset($data['password'])) {
+            if (isset($data['password']) || $emailChanged || $oldRole !== $user->role) {
+                if ($user->id_user === $r->user()->id_user) {
+                    $r->session()->regenerate(true);
+                }
                 $user->forceFill(['remember_token' => Str::random(60)])->save();
                 DB::table('sessions')->where('user_id', $user->id_user)->where('id', '!=', $r->session()->getId())->delete();
             }
+            if ($emailChanged && $oldEmail) {
+                DB::table('password_reset_tokens')->where('email', $oldEmail)->delete();
+            }
+            SecurityEvent::record('account.updated', ['target_id' => $user->id_user, 'old_role' => $oldRole, 'new_role' => $user->role]);
             Activity::record('Pengguna '.$user->nama.' disimpan', 'Pengguna');
         });
+
+        if ($emailChanged) {
+            $user->sendEmailVerificationNotification();
+        }
 
         return redirect()->route('admin.users.index')->with('success', 'Pengguna berhasil disimpan.');
     }

@@ -1,11 +1,13 @@
 <?php
 
+use App\Http\Controllers\AccountRecoveryController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BuyerOrdersController;
 use App\Http\Controllers\BuyersController;
 use App\Http\Controllers\CaretakersController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\LivestockController;
 use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\ProductsController;
@@ -18,6 +20,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [StoreController::class, 'index'])->name('store');
 Route::get('/products/{id}', [StoreController::class, 'show'])->whereNumber('id')->name('products.show');
 Route::middleware('guest')->group(function () {
+    Route::get('/forgot-password', [AccountRecoveryController::class, 'requestForm'])->name('password.request');
+    Route::post('/forgot-password', [AccountRecoveryController::class, 'send'])->name('password.email');
+    Route::get('/reset-password/{token}', [AccountRecoveryController::class, 'resetForm'])->name('password.reset');
+    Route::post('/reset-password', [AccountRecoveryController::class, 'reset'])->name('password.update');
     Route::get('/login', [AuthController::class, 'loginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
     Route::get('/admin/login', [AuthController::class, 'loginForm'])->name('admin.login');
@@ -26,6 +32,9 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:10,1')->name('register.submit');
 });
 Route::middleware('auth')->group(function () {
+    Route::get('/email/verify', [EmailVerificationController::class, 'notice'])->name('verification.notice');
+    Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])->middleware('signed')->name('verification.verify');
+    Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend'])->name('verification.send');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/dashboard', fn () => redirect()->route(auth()->user()->isManager() ? 'admin.dashboard' : 'dashboard.pembeli'))->name('dashboard');
     Route::middleware('can:buy')->group(function () {
@@ -36,7 +45,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/cart', [CartController::class, 'index'])->name('cart');
         Route::post('/cart/{id}', [CartController::class, 'add'])->whereNumber('id')->name('cart.add')->block();
         Route::patch('/cart/{id}', [CartController::class, 'update'])->whereNumber('id')->name('cart.update')->block();
-        Route::post('/checkout', [CartController::class, 'checkout'])->name('checkout')->block();
+        Route::post('/checkout', [CartController::class, 'checkout'])->middleware('verified')->name('checkout')->block();
         Route::get('/orders', [BuyerOrdersController::class, 'index'])->name('buyer.orders');
         Route::delete('/orders/{id}', [OrdersController::class, 'cancel'])->whereNumber('id')->name('buyer.orders.cancel');
     });

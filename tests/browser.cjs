@@ -9,7 +9,7 @@ const port = Number(process.env.BROWSER_PORT || 8123);
 const base = `http://127.0.0.1:${port}`;
 const artifacts = path.join(root, 'test-results');
 const pages = [
-  ['/login','guest'],['/register','guest'],['/','guest'],['/products/1','guest'],
+  ['/login','guest'],['/admin/login','guest'],['/forgot-password','guest'],['/register','guest'],['/','guest'],['/products/1','guest'],
   ['/admin','petani'],['/admin/products','petani'],['/admin/buyers','petani'],
   ['/admin/stock','petani'],['/admin/orders','petani'],['/admin/profile','petani'],
   ['/admin/livestock','petani'],['/admin/caretakers','petani'],
@@ -34,7 +34,7 @@ const pages = [
     await Promise.all([page.waitForNavigation({waitUntil:'domcontentloaded'}),button.click()]);
   }
   async function login(page, username, password='demo12345') {
-    await go(page,username==='pembeli'?'/login':'/admin/login');
+    await go(page,['admin','superadmin','browserstaff'].includes(username)?'/admin/login':'/login');
     await page.locator('[name=username]').fill(username);
     await page.locator('[name=password]').fill(password);
     await submit(page,page.getByRole('button',{name:'Masuk',exact:true}));
@@ -82,7 +82,7 @@ const pages = [
       if(process.env.BROWSER_SCREENSHOTS==='1')await page.screenshot({path:path.join(artifacts,slug+'-mobile.png'),fullPage:true});
       await page.setViewportSize({width:1584,height:900});
     }
-    ok('All 17 pages render on desktop and mobile without overflow');
+    ok('All application and account pages render on desktop and mobile without overflow');
     // Check the responsive shells themselves, not only absence of body overflow.
     for(const role of ['petani','admin','pembeli','guest']) {
       const page=contexts[role].page;
@@ -259,12 +259,28 @@ const pages = [
     const stranger=await fresh();await go(stranger.page,'/register');
     for(const [name,value] of Object.entries({nama:'Browser Buyer',username:'browserbuyer',email:'browserbuyer@example.test',password:'password12345',password_confirmation:'password12345'}))await stranger.page.locator(`[name=${name}]`).fill(value);
     await submit(stranger.page,stranger.page.getByRole('button',{name:'Daftar',exact:true}));await stranger.page.waitForURL('**/dashboard/pembeli');
+    await go(stranger.page,'/email/verify');
+    await stranger.page.setViewportSize({width:320,height:844});
+    assert.ok(await stranger.page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Verification page fits small phones');
+    assert.match(await stranger.page.locator('main h1').innerText(),/Verifikasi Email/);
+    const verificationLink=execFileSync('php',['-r',
+      "require 'tests/bootstrap-database.php'; Illuminate\\Support\\Facades\\URL::forceRootUrl($argv[1]); $u=App\\Models\\User::whereUsername('browserbuyer')->firstOrFail(); echo Illuminate\\Support\\Facades\\URL::temporarySignedRoute('verification.verify',now()->addMinutes(60),['id'=>$u->id_user,'hash'=>sha1($u->email)]);",base],{cwd:root,encoding:'utf8'});
+    await stranger.page.goto(verificationLink);await stranger.page.waitForURL('**/dashboard/pembeli');
+    await stranger.page.setViewportSize({width:1584,height:900});
     assert.equal((await stranger.context.request.get(base+'/orders/'+ownOrder)).status(),403);
     assert.equal((await stranger.context.request.get(base+'/admin/products')).status(),403);
     await go(stranger.page,'/orders');assert.equal(await stranger.page.locator('.order-card').count(),0);
     await go(stranger.page,'/profile');await stranger.page.locator('[name=nama]').fill('Browser Buyer Updated');await submit(stranger.page,stranger.page.getByRole('button',{name:'Simpan Perubahan',exact:true}));
     assert.equal(await stranger.page.locator('[name=nama]').inputValue(),'Browser Buyer Updated');
-    await submit(stranger.page,stranger.page.getByRole('button',{name:'Keluar',exact:true}));await stranger.page.waitForURL('**/login');await stranger.context.close();
+    await submit(stranger.page,stranger.page.getByRole('button',{name:'Keluar',exact:true}));await stranger.page.waitForURL('**/login');
+    const resetToken=execFileSync('php',['-r',"require 'tests/bootstrap-database.php'; echo Illuminate\\Support\\Facades\\Password::createToken(App\\Models\\User::whereUsername('browserbuyer')->firstOrFail());"],{cwd:root,encoding:'utf8'});
+    await go(stranger.page,`/reset-password/${resetToken}?email=browserbuyer@example.test`);
+    await stranger.page.locator('[name=password]').fill('browser-new-password123');
+    await stranger.page.locator('[name=password_confirmation]').fill('browser-new-password123');
+    await submit(stranger.page,stranger.page.getByRole('button',{name:'Simpan Kata Sandi',exact:true}));
+    await stranger.page.waitForURL('**/login');
+    await login(stranger.page,'browserbuyer','browser-new-password123');
+    await stranger.context.close();
     ok('Buyer registration, cross-account privacy, profile persistence and logout');
     assert.deepEqual(errors,[],'Unexpected browser errors');
     ok('No JavaScript errors or failed page resources');

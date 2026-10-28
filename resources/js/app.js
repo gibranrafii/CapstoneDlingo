@@ -40,10 +40,14 @@ if(document.body.dataset.reopen)openDialog(document.getElementById(document.body
 setTimeout(()=>document.querySelector('.toast-region')?.remove(),5000);
 
 const newPassword=document.querySelector('#profile-form [name=password]');
-if(newPassword){const current=document.getElementById('current-password-field');const sync=()=>{current.hidden=!newPassword.value;current.querySelector('input').required=!!newPassword.value;};newPassword.addEventListener('input',sync);sync();}
+if(newPassword){
+  const current=document.getElementById('current-password-field'), email=newPassword.form.querySelector('[name=email]');
+  const sync=()=>{const changed=!!newPassword.value || email.value.trim()!==newPassword.form.dataset.originalEmail;current.hidden=!changed;current.querySelector('input').required=changed;};
+  newPassword.addEventListener('input',sync);email.addEventListener('input',sync);sync();
+}
 
 const showOrder=async url=>{
-  try{const response=await fetch(url,{headers:{'X-Requested-With':'XMLHttpRequest'}});if(response.status===401||response.redirected){location.href='/login';return;}if(!response.ok||response.headers.get('X-Dlingo-Order')!=='1')throw Error('Pesanan tidak dapat ditampilkan.');document.getElementById('order-detail-body').innerHTML=await response.text();openDialog(document.getElementById('order-detail'));}
+  try{const response=await fetch(url,{headers:{'X-Requested-With':'XMLHttpRequest'}});if(response.status===401||response.redirected){location.href=location.pathname.startsWith('/admin')?'/admin/login':'/login';return;}if(!response.ok||response.headers.get('X-Dlingo-Order')!=='1')throw Error('Pesanan tidak dapat ditampilkan.');document.getElementById('order-detail-body').innerHTML=await response.text();openDialog(document.getElementById('order-detail'));}
   catch(error){const el=document.createElement('div');el.className='toast-region';el.setAttribute('role','alert');const message=document.createElement('div');message.className='toast-message error';message.textContent=error.message;el.append(message);document.body.append(el);setTimeout(()=>el.remove(),4500);}
 };
 document.addEventListener('click',event=>{const order=event.target.closest('[data-order]');if(order){event.preventDefault();showOrder(order.href);}});
