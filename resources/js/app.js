@@ -1,4 +1,11 @@
-const openDialog = dialog => { if (!dialog || dialog.open) return; dialog.returnFocus=document.activeElement;dialog.showModal(); };
+const openDialog = dialog => {
+  if (!dialog || dialog.open) return;
+  const current = document.querySelector('dialog[open]');
+  const returnFocus = current?.returnFocus || document.activeElement;
+  current?.close();
+  dialog.returnFocus = returnFocus;
+  dialog.showModal();
+};
 const urls = new Map();
 document.addEventListener('click', event => {
   const open=event.target.closest('[data-open]');if(open){event.preventDefault();openDialog(document.getElementById(open.dataset.open));}
