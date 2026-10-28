@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\SecurityEvent;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,7 @@ class StaffIdleTimeout
             $sameUser = $request->session()->get('security.user_id') === $user->id_user;
             $last = $sameUser ? $request->session()->get('security.last_active', time()) : time();
             if ($user->isManager() && (Auth::viaRemember() || time() - $last >= config('security.staff_idle_minutes', 30) * 60)) {
+                SecurityEvent::record('session.expired');
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();

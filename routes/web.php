@@ -29,7 +29,7 @@ Route::middleware('guest')->group(function () {
     Route::get('/admin/login', [AuthController::class, 'loginForm'])->name('admin.login');
     Route::post('/admin/login', [AuthController::class, 'login'])->name('admin.login.submit');
     Route::get('/register', [AuthController::class, 'registerForm'])->name('register');
-    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:10,1')->name('register.submit');
+    Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
 });
 Route::middleware('auth')->group(function () {
     Route::get('/email/verify', [EmailVerificationController::class, 'notice'])->name('verification.notice');

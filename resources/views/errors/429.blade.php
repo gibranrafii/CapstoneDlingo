@@ -1,0 +1,1 @@
+<x-layout page="error" title="429" shell="auth"><main class="auth-main" id="app-main" tabindex="-1"><section class="auth-card"><h1>429</h1><p class="auth-subtitle">Terlalu banyak permintaan. Tunggu sebentar, lalu coba kembali.</p><a class="button" href="{{ config('app.url') }}">Kembali ke beranda</a></section></main></x-layout>

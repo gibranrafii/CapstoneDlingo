@@ -1,0 +1,1 @@
+<x-layout page="error" title="413" shell="auth"><main class="auth-main" id="app-main" tabindex="-1"><section class="auth-card"><h1>413</h1><p class="auth-subtitle">File atau permintaan terlalu besar.</p><a class="button" href="{{ config('app.url') }}">Kembali ke beranda</a></section></main></x-layout>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Rules\PasswordBytes;
 use App\Services\Activity;
+use App\Services\SecurityEvent;
 use App\Support\Ui;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -47,6 +48,7 @@ class ProfileController extends Controller
             if ($emailChanged) {
                 DB::table('password_reset_tokens')->where('email', $oldEmail)->delete();
             }
+            SecurityEvent::record('profile.updated', ['target_id' => $user->id_user]);
             Activity::record('Profil akun diperbarui', 'Profil');
         });
 

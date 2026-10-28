@@ -6,6 +6,7 @@ use App\Models\Buyer;
 use App\Models\User;
 use App\Rules\PasswordBytes;
 use App\Services\Activity;
+use App\Services\SecurityEvent;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -26,15 +27,19 @@ class AuthController extends Controller
         $identity = trim($data['username']);
         $key = app()->environment().':login:'.hash('sha256', mb_strtolower($identity).'|'.$request->ip());
         $staff = $request->is('admin/*');
-        if (RateLimiter::tooManyAttempts($key, 5)) {
+        $identityHash = hash_hmac('sha256', mb_strtolower($identity), config('app.key'));
+        if (RateLimiter::tooManyAttempts($key, config('security.limits.failed_login'))) {
+            SecurityEvent::record('login.throttled', ['identity_hash' => $identityHash]);
             abort(response('Terlalu banyak percobaan. Silakan coba lagi.', 429)->header('Retry-After', RateLimiter::availableIn($key)));
         }
         $column = filter_var($identity, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
         if (! Auth::attemptWhen([$column => $identity, 'password' => $data['password'], 'is_active' => 1], fn (User $user) => $staff ? $user->isManager() : $user->role === 'pembeli', ! $staff && $request->boolean('remember'))) {
             RateLimiter::hit($key, 60);
+            SecurityEvent::record('login.failed', ['identity_hash' => $identityHash]);
             throw ValidationException::withMessages(['username' => 'Username atau kata sandi salah.']);
         }
         RateLimiter::clear($key);
+        SecurityEvent::record('login.succeeded');
         $request->session()->regenerate();
 
         $request->session()->put(['security.user_id' => $request->user()->id_user, 'security.last_active' => time()]);

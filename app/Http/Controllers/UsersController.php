@@ -90,6 +90,7 @@ class UsersController extends Controller
             $user = User::lockForUpdate()->findOrFail($id);
             $user->update(['is_active' => false, 'remember_token' => Str::random(60)]);
             DB::table('sessions')->where('user_id', $id)->delete();
+            SecurityEvent::record('account.deactivated', ['target_id' => $id]);
             Activity::record('Pengguna '.$user->nama.' dinonaktifkan', 'Pengguna');
         });
 

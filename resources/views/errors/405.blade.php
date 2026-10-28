@@ -1,0 +1,1 @@
+<x-layout page="error" title="405" shell="auth"><main class="auth-main" id="app-main" tabindex="-1"><section class="auth-card"><h1>405</h1><p class="auth-subtitle">Metode permintaan tidak diizinkan.</p><a class="button" href="{{ config('app.url') }}">Kembali ke beranda</a></section></main></x-layout>

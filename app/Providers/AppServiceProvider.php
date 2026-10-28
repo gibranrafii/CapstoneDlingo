@@ -6,6 +6,7 @@ use App\Models\FarmSetting;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -18,6 +19,11 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if ($this->app->isProduction()) {
+            config(['app.debug' => false, 'session.secure' => true, 'session.http_only' => true, 'session.same_site' => 'lax', 'session.domain' => null]);
+            URL::forceRootUrl(config('app.url'));
+            URL::forceScheme('https');
+        }
         DB::prohibitDestructiveCommands(DB::getDatabaseName() !== 'dlingo_jamur_test' || $this->app->isProduction());
 
         Gate::define('manage-farm', fn (User $user) => $user->isManager());
