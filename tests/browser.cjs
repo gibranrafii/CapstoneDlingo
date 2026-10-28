@@ -76,10 +76,10 @@ const pages = [
       assert.equal(new URL(page.url()).pathname,route,`${role}: ${route} resolves`);
       assert.equal(await page.locator('h1').count(),1);
       const slug=route.replace(/[^a-z0-9]/gi,'-')||'store';
-      await page.screenshot({path:path.join(artifacts,slug+'-desktop.png'),fullPage:true});
+      if(process.env.BROWSER_SCREENSHOTS==='1')await page.screenshot({path:path.join(artifacts,slug+'-desktop.png'),fullPage:true});
       await page.setViewportSize({width:390,height:844});
       assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`${route}: mobile body overflow`);
-      await page.screenshot({path:path.join(artifacts,slug+'-mobile.png'),fullPage:true});
+      if(process.env.BROWSER_SCREENSHOTS==='1')await page.screenshot({path:path.join(artifacts,slug+'-mobile.png'),fullPage:true});
       await page.setViewportSize({width:1584,height:900});
     }
     ok('All 17 pages render on desktop and mobile without overflow');
@@ -135,8 +135,8 @@ const pages = [
     }
     await go(buyer,'/orders');assert.match(await buyer.locator('.order-card').first().innerText(),/Selesai/);
     await go(staff,'/dashboard/petani');assert.match(await staff.locator('.stat').filter({hasText:'Pemasukan'}).innerText(),/15.000/);
-    await staff.getByRole('button',{name:'Rekening',exact:true}).click();assert.equal(await dialog(staff).locator('input').count(),0);await dialog(staff).getByRole('button',{name:'Tutup dialog',exact:true}).click();
-    await staff.getByRole('button',{name:'Upload File',exact:true}).click();await dialog(staff).locator('input[type=file]').setInputFiles({name:'preview.png',mimeType:'image/png',buffer:png});await dialog(staff).locator('.file-preview').waitFor();await dialog(staff).getByRole('button',{name:'Tutup dialog',exact:true}).click();
+    await staff.locator('main').getByRole('button',{name:'Rekening',exact:true}).click();assert.equal(await dialog(staff).locator('input').count(),0);await dialog(staff).getByRole('button',{name:'Tutup dialog',exact:true}).click();
+    await staff.locator('main').getByRole('button',{name:'Upload File',exact:true}).click();await dialog(staff).locator('input[type=file]').setInputFiles({name:'preview.png',mimeType:'image/png',buffer:png});await dialog(staff).locator('.file-preview').waitFor();await dialog(staff).getByRole('button',{name:'Tutup dialog',exact:true}).click();
     ok('Staff orders progress through all statuses and completed revenue updates');
 
     await go(admin,'/admin/users');await admin.locator('[data-open=user-new]').first().click();
@@ -146,7 +146,7 @@ const pages = [
     assert.equal((await extra.context.request.get(base+'/admin/users')).status(),403);
     await admin.getByRole('button',{name:'Hapus Browser Staff (nonaktifkan akun)',exact:true}).click();await save(admin,'Hapus');
     await go(extra.page,'/profile');assert.equal(new URL(extra.page.url()).pathname,'/login');await extra.context.close();
-    await go(admin,'/profile');await admin.getByRole('button',{name:'Rekening',exact:true}).click();await dialog(admin).locator('[name=no_rekening]').fill('9876543210');await save(admin);
+    await go(admin,'/profile');await admin.locator('main').getByRole('button',{name:'Rekening',exact:true}).click();await dialog(admin).locator('[name=no_rekening]').fill('9876543210');await save(admin);
     await go(buyer,'/products/1');assert.match(await buyer.locator('main').innerText(),/9876543210/);
     ok('Admin-only accounts, deactivation invalidates sessions, and bank settings are shared');
 

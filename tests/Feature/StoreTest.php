@@ -17,6 +17,6 @@ class StoreTest extends TestCase
         $this->get('/?category=Baglog')->assertSee('Baglog Tiram')->assertDontSee('Jamur Kuping');
         $this->get('/?sort=price-high')->assertSeeInOrder(['Jamur Kuping', 'Jamur Tiram', 'Baglog Tiram']);
         Product::find(1)->update(['stok' => 0]);
-        $this->get('/')->assertSee('Stok: 0');
+        $this->get('/')->assertSee('Stok habis')->assertSee('<button class="button" disabled>', false);
     }
 }

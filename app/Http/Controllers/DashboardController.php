@@ -38,6 +38,11 @@ class DashboardController extends Controller
     {
         $query = Order::whereHas('buyer', fn ($q) => $q->where('account_user_id', $r->user()->id_user));
 
-        return view('dashboard.buyer', ['orders' => (clone $query)->latest('id_pesanan')->limit(5)->get(), 'counts' => (clone $query)->selectRaw("COUNT(*) total,SUM(status='selesai') completed,COALESCE(SUM(CASE WHEN status!='dibatalkan' THEN total_harga ELSE 0 END),0) spent")->first(), 'cart' => $cart->items($r)]);
+        return view('dashboard.buyer', [
+            'orders' => (clone $query)->latest('id_pesanan')->limit(1)->get(),
+            'pendingOrders' => (clone $query)->where('status', 'menunggu')->count(),
+            'products' => Product::orderBy('nama_produk')->orderBy('id_produk')->limit(3)->get(),
+            'cart' => $cart->items($r),
+        ]);
     }
 }

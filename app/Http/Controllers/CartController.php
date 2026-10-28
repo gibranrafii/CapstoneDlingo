@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FarmSetting;
 use App\Services\CartService;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
@@ -12,7 +13,7 @@ class CartController extends Controller
     {
         $items = $cart->items($r);
 
-        return view('store.cart', ['items' => $items, 'buyer' => $r->user()->buyer, 'total' => $items->sum('subtotal')]);
+        return view('store.cart', ['items' => $items, 'buyer' => $r->user()->buyer, 'total' => $items->sum('subtotal'), 'farm' => app(FarmSetting::class)]);
     }
 
     public function add(Request $r, int $id, CartService $cart)

@@ -41,3 +41,10 @@ document.querySelectorAll('[data-customer-address]').forEach(select=>select.addE
 document.querySelectorAll('[data-filters] select').forEach(select=>select.addEventListener('change',()=>select.form.requestSubmit()));
 
 document.querySelectorAll('[data-quantity]').forEach(input=>input.addEventListener('change',()=>input.form.requestSubmit()));
+
+// Reserve photo dimensions and reveal the same neutral placeholder after a failed load.
+document.querySelectorAll('[data-product-image]').forEach(image => {
+  const fallback = () => { image.hidden = true; image.previousElementSibling.hidden = false; };
+  image.addEventListener('error', fallback);
+  if (image.complete && !image.naturalWidth) fallback();
+});
