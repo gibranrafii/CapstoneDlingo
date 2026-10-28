@@ -1,0 +1,13 @@
+[Unit]
+Description=Encrypted JamurTani database and upload backup
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+UMask=0077
+ExecStart=/usr/local/libexec/jamurtani-backup
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectHome=read-only

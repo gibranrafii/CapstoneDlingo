@@ -9,6 +9,16 @@ class Ui
 {
     public const STATUSES = ['menunggu' => 'Menunggu', 'dikonfirmasi' => 'Dikonfirmasi', 'diproses' => 'Diproses', 'dikirim' => 'Dikirim', 'selesai' => 'Selesai', 'dibatalkan' => 'Dibatalkan'];
 
+    public static function profileUrl(): string
+    {
+        return route(auth()->user()?->isManager() ? 'admin.profile' : 'profile');
+    }
+
+    public static function orderUrl(int $id): string
+    {
+        return route(auth()->user()?->isManager() ? 'admin.orders.show' : 'orders.show', $id);
+    }
+
     public static function icon(string $name): HtmlString
     {
         static $paths;

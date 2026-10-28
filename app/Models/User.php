@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
+use App\Services\SecurityEvent;
+use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
-    use \Illuminate\Database\Eloquent\Factories\HasFactory, Notifiable;
+    use HasFactory, Notifiable;
 
     protected $table = 'user';
 
@@ -19,7 +23,16 @@ class User extends Authenticatable
 
     protected function casts(): array
     {
-        return ['password' => 'hashed', 'is_active' => 'boolean'];
+        return ['password' => 'hashed', 'is_active' => 'boolean', 'email_verified_at' => 'datetime'];
+    }
+
+    public function sendEmailVerificationNotification(): void
+    {
+        try {
+            $this->notify(new VerifyEmail);
+        } catch (\Throwable $error) {
+            SecurityEvent::record('verification.delivery_failed', ['target_id' => $this->id_user, 'exception_class' => $error::class]);
+        }
     }
 
     public function buyer()

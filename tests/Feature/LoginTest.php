@@ -10,15 +10,15 @@ class LoginTest extends TestCase
 {
     use DatabaseTransactions;
 
-    public function test_login_page_preserves_reference_and_posts_to_laravel(): void
+    public function test_login_page_shows_brand_and_posts_to_laravel(): void
     {
-        $this->get('/login')->assertOk()->assertSee('Dashboard Peternakan')->assertSee('name="_token"', false);
+        $this->get('/login')->assertOk()->assertSee('Masuk ke JamurTani')->assertSee('name="_token"', false);
     }
 
     public function test_username_and_email_logins_authenticate_real_accounts(): void
     {
         foreach (['admin', 'budi@example.com'] as $identity) {
-            $this->post('/login', ['username' => $identity, 'password' => 'demo12345', 'remember' => 1])->assertRedirect('/dashboard');
+            $this->post('/admin/login', ['username' => $identity, 'password' => 'demo12345', 'remember' => 1])->assertRedirect('/admin');
             $this->assertAuthenticatedAs(User::find(2));
             auth()->logout();
         }
@@ -35,7 +35,7 @@ class LoginTest extends TestCase
 
     public function test_logout_invalidates_authentication(): void
     {
-        $this->actingAs(User::find(2))->post('/logout')->assertRedirect('/login');
+        $this->actingAs(User::find(2))->post('/logout')->assertRedirect('/admin/login');
         $this->assertGuest();
     }
 }

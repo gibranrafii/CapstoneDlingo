@@ -13,9 +13,9 @@ class StockTest extends TestCase
 
     public function test_stock_page_uses_current_database_values(): void
     {
-        $this->actingAs(User::find(2))->get('/manage/stock')->assertOk()->assertSee('183')->assertSee('Jamur Kuping');
+        $this->actingAs(User::find(2))->get('/admin/stock')->assertOk()->assertSee('183')->assertSee('Jamur Kuping');
         Product::find(2)->update(['stok' => 15]);
-        $this->get('/manage/stock')->assertOk()->assertSee('190')->assertSee('STOK MENIPIS (0)');
-        $this->actingAs(User::find(3))->get('/manage/stock')->assertForbidden();
+        $this->get('/admin/stock')->assertOk()->assertSee('190')->assertSee('Stok menipis (0)');
+        $this->actingAs(User::find(3))->get('/admin/stock')->assertForbidden();
     }
 }

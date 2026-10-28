@@ -14,9 +14,9 @@ class FarmerDashboardTest extends TestCase
     public function test_shared_dashboard_counts_only_completed_revenue(): void
     {
         $order = app(OrderService::class)->create(User::find(2), 1, [1 => 1], 'Dlingo');
-        $this->actingAs(User::find(2))->get('/dashboard/petani')->assertOk()->assertSee('Total Ternak')->assertSee('Rp 0')->assertDontSee('Rp 15.000');
+        $this->actingAs(User::find(2))->get('/admin')->assertOk()->assertSee('Total Ternak')->assertViewHas('orders', fn ($metrics) => (float) $metrics->income === 0.0)->assertViewHas('pendingOrders', 1);
         $order->update(['status' => 'selesai']);
-        $this->get('/dashboard/petani')->assertSee('Rp 15.000');
-        $this->actingAs(User::find(3))->get('/dashboard/petani')->assertForbidden();
+        $this->get('/admin')->assertViewHas('orders', fn ($metrics) => (float) $metrics->income === 15000.0);
+        $this->actingAs(User::find(3))->get('/admin')->assertForbidden();
     }
 }

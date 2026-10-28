@@ -1,0 +1,1 @@
+<x-layout page="error" title="400" shell="auth"><main class="auth-main" id="app-main" tabindex="-1"><section class="auth-card"><h1>400</h1><p class="auth-subtitle">Permintaan tidak valid.</p><a class="button" href="{{ config('app.url') }}">Kembali ke beranda</a></section></main></x-layout>

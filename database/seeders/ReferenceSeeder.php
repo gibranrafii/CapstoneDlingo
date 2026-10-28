@@ -10,6 +10,9 @@ class ReferenceSeeder extends Seeder
 {
     public function run(): void
     {
+        if (app()->isProduction()) {
+            throw new \RuntimeException('Reference/demo accounts cannot be seeded in production. Use security:create-admin.');
+        }
         foreach (['user', 'pembeli', 'product', 'ternak', 'pengurus', 'pengurus_ternak', 'pesanan', 'detail_pesanan'] as $table) {
             if (DB::table($table)->exists()) {
                 $this->command?->warn('Reference seeding skipped: domain data already exists.');
@@ -23,7 +26,7 @@ class ReferenceSeeder extends Seeder
         DB::transaction(function () use ($data, $id, $date) {
             $password = Hash::make('demo12345');
             foreach ($data['users'] as $u) {
-                DB::table('user')->insert(['id_user' => $id($u['id']), 'username' => $u['username'], 'nama' => $u['nama'], 'email' => $u['email'], 'no_telepon' => $u['no_telepon'], 'role' => $u['role'], 'password' => $password, 'is_active' => true, 'created_at' => $date, 'updated_at' => now()->subHours(9)]);
+                DB::table('user')->insert(['id_user' => $id($u['id']), 'username' => $u['username'], 'nama' => $u['nama'], 'email' => $u['email'], 'no_telepon' => $u['no_telepon'], 'role' => $u['role'], 'password' => $password, 'is_active' => true, 'email_verified_at' => now(), 'created_at' => $date, 'updated_at' => now()->subHours(9)]);
             }
             foreach ($data['buyers'] as $b) {
                 DB::table('pembeli')->insert(['id_pembeli' => $id($b['id']), 'id_user' => 2, 'account_user_id' => $b['id'] === 'PBL-001' ? 3 : null, 'nama_pembeli' => $b['nama'], 'email_pembeli' => $b['email'] ?: null, 'no_telepon_pembeli' => $b['no_telepon'], 'alamat_pembeli' => $b['alamat'], 'created_at' => $date, 'updated_at' => $date]);

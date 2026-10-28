@@ -13,7 +13,7 @@ class RegistrationTest extends TestCase
 
     private function data(): array
     {
-        return ['nama' => 'Pembeli Baru', 'username' => 'baru', 'email' => 'baru@example.test', 'password' => 'password123', 'password_confirmation' => 'password123', 'alamat' => 'Desa Dlingo'];
+        return ['nama' => 'Pembeli Baru', 'username' => 'baru', 'email' => 'baru@example.test', 'password' => 'password12345', 'password_confirmation' => 'password12345', 'alamat' => 'Desa Dlingo'];
     }
 
     public function test_registration_creates_a_linked_buyer_and_session(): void
