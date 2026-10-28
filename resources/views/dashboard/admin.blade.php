@@ -4,7 +4,7 @@
 <section class="section"><x-heading title="Menu Administrasi"/><div class="menu-grid">
 <x-tile label="Kelola Pengguna" :href="route('admin.users.index')" icon="users"/><x-tile label="Kelola Produk" :href="route('manage.products.index')" icon="product"/><x-tile label="Pesanan" :href="route('manage.orders.index')" icon="orders"/>
 <x-tile label="Pembeli" :href="route('manage.buyers.index')" icon="cart"/><x-tile label="Kelola Stok" :href="route('manage.stock')" icon="stock"/><x-tile label="Kelola Ternak" :href="route('manage.livestock.index')" icon="leaf"/>
-<x-tile label="Pengurus" :href="route('manage.caretakers.index')" icon="users"/><x-tile label="Profil Saya" :href="route('profile')" icon="user"/>
+<x-tile label="Pengurus" :href="route('manage.caretakers.index')" icon="users"/><x-tile label="Profil Saya" :href="\App\Support\Ui::profileUrl()" icon="user"/>
 </div></section>
 @include('partials.staff-overview')
 <section class="section panel"><x-heading title="Pengguna Terbaru"><a class="subtle-link" href="{{ route('admin.users.index') }}">Lihat Semua</a></x-heading><p class="muted">{{ $users->where('role','petani')->count() }} petani · {{ $users->where('role','pembeli')->count() }} akun pembeli · {{ $users->where('role','admin')->count() }} administrator</p>

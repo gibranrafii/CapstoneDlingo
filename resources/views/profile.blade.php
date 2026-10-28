@@ -1,8 +1,8 @@
 <x-layout page="profile" title="Profil Saya"><x-banner title="Profil Saya" subtitle="Kelola informasi akun Anda." icon="user"/>
-<div class="two-column"><section class="panel"><h2>Informasi Akun</h2><form id="profile-form" method="POST" action="{{ route('profile.update') }}">@csrf @method('PUT')<input type="hidden" name="_modal" value="profile">
+<div class="two-column"><section class="panel"><h2>Informasi Akun</h2><form id="profile-form" method="POST" action="{{ \App\Support\Ui::profileUrl() }}">@csrf @method('PUT')<input type="hidden" name="_modal" value="profile">
 <x-field form="profile" name="username" label="Username" :value="$user->username" autocomplete="username" required/><x-field form="profile" name="nama" label="Nama Lengkap" :value="$user->nama" autocomplete="name" required/><x-field form="profile" name="email" label="Email" type="email" :value="$user->email" autocomplete="email" required/><x-field form="profile" name="no_telepon" label="No. Telepon" type="tel" :value="$user->no_telepon" autocomplete="tel" maxlength="50"/>
 @if($user->role==='pembeli')<x-field form="profile" name="alamat" label="Alamat" type="textarea" :value="$user->buyer?->alamat_pembeli" maxlength="255"/>@endif
-<x-field form="profile" name="password" label="Password Baru (kosongkan jika tidak diubah)" type="password" placeholder="Masukkan password baru" minlength="8" autocomplete="new-password"/>
+<x-field form="profile" name="password" label="Password Baru (kosongkan jika tidak diubah)" type="password" placeholder="Masukkan password baru" minlength="12" autocomplete="new-password"/>
 <x-field form="profile" name="password_confirmation" label="Konfirmasi Password" type="password" placeholder="Ulangi password baru" autocomplete="new-password"/>
 <div id="current-password-field" hidden><x-field form="profile" name="current_password" label="Kata Sandi Saat Ini" type="password" autocomplete="current-password"/></div>
 <x-errors for="profile"/><button class="button small" type="submit">{{ \App\Support\Ui::icon('save') }}Simpan Perubahan</button></form></section>

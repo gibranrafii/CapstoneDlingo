@@ -7,5 +7,5 @@
 <x-field :form="$modal" name="nama" label="Nama Lengkap" :value="$u->nama" maxlength="255" required/><x-field :form="$modal" name="username" label="Username" :value="$u->username" maxlength="255" required autocomplete="off"/>
 <x-field :form="$modal" name="email" label="Email" :value="$u->email" type="email" maxlength="255" required/><x-field :form="$modal" name="no_telepon" label="No. Telepon" :value="$u->no_telepon" type="tel" maxlength="50"/>
 <x-field :form="$modal" name="role" label="Role" type="select" :value="$u->role??'petani'" :options="['admin'=>'Admin','petani'=>'Petani','pembeli'=>'Pembeli']"/>
-<x-field :form="$modal" name="password" :label="$u->exists?'Password Baru (kosongkan jika tidak diubah)':'Kata Sandi'" type="password" minlength="8" maxlength="255" :required="!$u->exists" autocomplete="new-password"/>
-</x-dialog>@endforeach</x-layout>
+<x-field :form="$modal" name="password" :label="$u->exists?'Password Baru (kosongkan jika tidak diubah)':'Kata Sandi'" type="password" minlength="12" maxlength="255" :required="!$u->exists" autocomplete="new-password"/>
+<x-field :form="$modal" name="current_password" label="Kata Sandi Anda Saat Ini" type="password" autocomplete="current-password" required/></x-dialog>@endforeach</x-layout>

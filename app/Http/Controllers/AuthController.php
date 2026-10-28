@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Buyer;
 use App\Models\User;
+use App\Rules\PasswordBytes;
 use App\Services\Activity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,28 +14,45 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    public function loginForm()
+    public function loginForm(Request $request)
     {
-        return view('auth.login');
+        return view('auth.login', ['staff' => $request->is('admin/*')]);
     }
 
     public function login(Request $request)
     {
         $data = $request->validate(['username' => ['required', 'string', 'max:255'], 'password' => ['required', 'string'], 'remember' => ['nullable', 'boolean']]);
         $identity = trim($data['username']);
-        $key = mb_strtolower($identity).'|'.$request->ip();
+        $key = app()->environment().':login:'.hash('sha256', mb_strtolower($identity).'|'.$request->ip());
+        $staff = $request->is('admin/*');
         if (RateLimiter::tooManyAttempts($key, 5)) {
-            throw ValidationException::withMessages(['username' => 'Terlalu banyak percobaan. Coba kembali dalam '.RateLimiter::availableIn($key).' detik.']);
+            abort(response('Terlalu banyak percobaan. Silakan coba lagi.', 429)->header('Retry-After', RateLimiter::availableIn($key)));
         }
         $column = filter_var($identity, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
-        if (! Auth::attempt([$column => $identity, 'password' => $data['password'], 'is_active' => 1], $request->boolean('remember'))) {
+        if (! Auth::attemptWhen([$column => $identity, 'password' => $data['password'], 'is_active' => 1], fn (User $user) => $staff ? $user->isManager() : $user->role === 'pembeli', ! $staff && $request->boolean('remember'))) {
             RateLimiter::hit($key, 60);
             throw ValidationException::withMessages(['username' => 'Username atau kata sandi salah.']);
         }
         RateLimiter::clear($key);
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard'));
+        $request->session()->put(['security.user_id' => $request->user()->id_user, 'security.last_active' => time()]);
+        $intended = $request->session()->pull('url.intended');
+        if (is_string($intended)) {
+            $parts = parse_url($intended);
+            $origin = parse_url(config('app.url'));
+            $path = $parts['path'] ?? '/';
+            $sameOrigin = isset($parts['host']) && strcasecmp($parts['host'], $origin['host'] ?? '') === 0
+                && ($parts['scheme'] ?? '') === ($origin['scheme'] ?? '') && ($parts['port'] ?? null) === ($origin['port'] ?? null)
+                && ! isset($parts['user']) && ! isset($parts['pass']);
+            $staffPath = $path === '/admin' || str_starts_with($path, '/admin/');
+            $buyerPath = in_array($path, ['/cart', '/orders', '/profile', '/dashboard/pembeli']) || preg_match('#^/(orders|products)/[0-9]+$#', $path);
+            if ($sameOrigin && ($staff ? $staffPath && $path !== '/admin/login' : $buyerPath)) {
+                return redirect()->to($intended);
+            }
+        }
+
+        return redirect()->route($staff ? 'admin.dashboard' : 'dashboard.pembeli');
     }
 
     public function registerForm()
@@ -44,7 +62,7 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $data = $request->validate(['nama' => ['required', 'string', 'max:255'], 'username' => ['required', 'string', 'max:255', 'unique:user,username'], 'email' => ['required', 'email', 'max:255', 'unique:user,email'], 'no_telepon' => ['nullable', 'string', 'max:50'], 'alamat' => ['nullable', 'string', 'max:255'], 'password' => ['required', 'string', 'min:8', 'max:255', 'confirmed'], 'role' => ['prohibited']]);
+        $data = $request->validate(['nama' => ['required', 'string', 'max:255'], 'username' => ['required', 'string', 'max:255', 'unique:user,username'], 'email' => ['required', 'email', 'max:255', 'unique:user,email'], 'no_telepon' => ['nullable', 'string', 'max:50'], 'alamat' => ['nullable', 'string', 'max:255'], 'password' => ['required', 'string', 'min:12', new PasswordBytes, 'confirmed'], 'role' => ['prohibited']]);
         $user = DB::transaction(function () use ($data) {
             $user = User::create(collect($data)->except('alamat')->all() + ['role' => 'pembeli', 'is_active' => true]);
             Buyer::create(['id_user' => $user->id_user, 'account_user_id' => $user->id_user, 'nama_pembeli' => $user->nama, 'email_pembeli' => $user->email, 'no_telepon_pembeli' => $user->no_telepon, 'alamat_pembeli' => $data['alamat'] ?? null]);
@@ -60,10 +78,11 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        $staff = $request->user()?->isManager();
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login');
+        return redirect()->route($staff ? 'admin.login' : 'login');
     }
 }

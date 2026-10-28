@@ -3,6 +3,6 @@
 <x-field form="register" name="email" label="Email" type="email" autocomplete="email" placeholder="nama@email.com" required/>
 <x-field form="register" name="no_telepon" label="No. Telepon" type="tel" autocomplete="tel" maxlength="50" placeholder="08xxxxxxxxxx"/>
 <x-field form="register" name="alamat" label="Alamat" type="textarea" autocomplete="street-address" maxlength="255" placeholder="Alamat lengkap Anda"/>
-<x-field form="register" name="password" label="Kata Sandi" type="password" minlength="8" autocomplete="new-password" placeholder="Minimal 8 karakter" required/>
-<x-field form="register" name="password_confirmation" label="Konfirmasi Kata Sandi" type="password" minlength="8" autocomplete="new-password" placeholder="Ulangi kata sandi" required/>
+<x-field form="register" name="password" label="Kata Sandi" type="password" minlength="12" autocomplete="new-password" placeholder="Minimal 12 karakter" required/>
+<x-field form="register" name="password_confirmation" label="Konfirmasi Kata Sandi" type="password" minlength="12" autocomplete="new-password" placeholder="Ulangi kata sandi" required/>
 <x-errors/><button class="button" type="submit">Daftar</button></form><p class="auth-footer">Sudah punya akun? <a href="{{ route('login') }}">Masuk</a></p></section></main></x-layout>

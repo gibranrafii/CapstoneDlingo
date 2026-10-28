@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\EnsureActiveAccount;
+use App\Http\Middleware\StaffIdleTimeout;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -12,7 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->appendToGroup('web', \App\Http\Middleware\EnsureActiveAccount::class);
+        $middleware->appendToGroup('web', [EnsureActiveAccount::class, StaffIdleTimeout::class]);
+        $middleware->redirectGuestsTo(fn (Request $request) => $request->is('admin', 'admin/*', 'manage/*', 'dashboard/petani', 'dashboard/admin') ? route('admin.login') : route('login'));
         $middleware->redirectUsersTo('/dashboard');
     })
     ->withExceptions(function (Exceptions $exceptions): void {

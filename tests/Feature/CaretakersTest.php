@@ -14,8 +14,8 @@ class CaretakersTest extends TestCase
 
     public function test_archiving_caretakers_closes_contracts_without_erasing_history(): void
     {
-        $this->actingAs(User::find(2))->get('/manage/caretakers')->assertOk()->assertSee('Slamet Riyadi');
-        $this->delete('/manage/caretakers/1')->assertRedirect();
+        $this->actingAs(User::find(2))->get('/admin/caretakers')->assertOk()->assertSee('Slamet Riyadi');
+        $this->delete('/admin/caretakers/1')->assertRedirect();
         $this->assertSoftDeleted('pengurus', ['id_pengurus' => 1]);
         $this->assertSame(0, ContractService::active()->where('id_pengurus', 1)->count());
         $this->assertSame(2, DB::table('pengurus_ternak')->where('id_pengurus', 1)->count());

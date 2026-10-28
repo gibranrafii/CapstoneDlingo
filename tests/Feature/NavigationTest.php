@@ -14,10 +14,10 @@ class NavigationTest extends TestCase
 
     public function test_staff_navigation_exposes_only_permitted_tools(): void
     {
-        $this->actingAs(User::find(2))->get('/manage/stock')->assertOk()
+        $this->actingAs(User::find(2))->get('/admin/stock')->assertOk()
             ->assertSee('class="sidebar"', false)->assertSee('id="staff-more"', false)
             ->assertSee(route('manage.caretakers.index'), false)->assertDontSee(route('admin.users.index'), false);
-        $this->actingAs(User::find(1))->get('/dashboard/admin')->assertOk()->assertSee(route('admin.users.index'), false);
+        $this->actingAs(User::find(1))->get('/admin')->assertOk()->assertSee(route('admin.users.index'), false);
         $this->actingAs(User::find(3))->get('/profile')->assertOk()->assertDontSee('class="sidebar"', false)
             ->assertDontSee('id="staff-more"', false)->assertDontSee(route('manage.products.index'), false);
     }
@@ -39,7 +39,7 @@ class NavigationTest extends TestCase
             $ids[] = $service->create(User::find(2), 1, [1 => 1], 'Dlingo')->id_pesanan;
         }
         $expected = array_reverse(array_slice($ids, 1));
-        $this->actingAs(User::find(2))->get('/dashboard/petani')->assertOk()
+        $this->actingAs(User::find(2))->get('/admin')->assertOk()
             ->assertViewHas('recentOrders', fn ($orders) => $orders->modelKeys() === $expected)
             ->assertViewHas('lowStock', fn ($products) => $products->modelKeys() === [1])
             ->assertViewHas('pendingOrders', 6);

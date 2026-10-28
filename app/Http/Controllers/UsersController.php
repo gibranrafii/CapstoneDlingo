@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Rules\PasswordBytes;
 use App\Services\Activity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -29,7 +30,8 @@ class UsersController extends Controller
 
     private function save(Request $r, User $user)
     {
-        $data = $r->validate(['nama' => ['required', 'string', 'max:255'], 'username' => ['required', 'string', 'max:255', Rule::unique('user')->ignore($user->id_user, 'id_user')], 'email' => ['required', 'email', 'max:255', Rule::unique('user')->ignore($user->id_user, 'id_user')], 'no_telepon' => ['nullable', 'string', 'max:50'], 'role' => ['required', Rule::in(['admin', 'petani', 'pembeli'])], 'password' => [$user->exists ? 'nullable' : 'required', 'string', 'min:8', 'max:255']]);
+        $r->validate(['current_password' => ['required', 'string', 'current_password']]);
+        $data = $r->validate(['nama' => ['required', 'string', 'max:255'], 'username' => ['required', 'string', 'max:255', Rule::unique('user')->ignore($user->id_user, 'id_user')], 'email' => ['required', 'email', 'max:255', Rule::unique('user')->ignore($user->id_user, 'id_user')], 'no_telepon' => ['nullable', 'string', 'max:50'], 'role' => ['required', Rule::in(['admin', 'petani', 'pembeli'])], 'password' => [$user->exists ? 'nullable' : 'required', 'string', 'min:12', new PasswordBytes]]);
         if ($user->id_user === $r->user()->id_user && $data['role'] !== $user->role) {
             throw ValidationException::withMessages(['role' => 'Anda tidak dapat mengubah role akun sendiri.']);
         }
@@ -62,6 +64,7 @@ class UsersController extends Controller
 
     public function destroy(Request $r, int $id)
     {
+        $r->validate(['current_password' => ['required', 'string', 'current_password']]);
         if ($id === $r->user()->id_user) {
             return back()->with('error', 'Anda tidak dapat menonaktifkan akun sendiri.');
         }
