@@ -47,15 +47,21 @@ class AccountRecoveryController extends Controller
             'password' => ['required', 'string', 'min:12', new PasswordBytes, 'confirmed'],
         ]);
         $staff = false;
-        $status = Password::reset($data + ['is_active' => true], function (User $user, string $password) use (&$staff) {
-            DB::transaction(function () use ($user, $password) {
-                $user->forceFill(['password' => $password, 'remember_token' => Str::random(60)])->save();
-                DB::table('sessions')->where('user_id', $user->id_user)->delete();
+        $status = DB::transaction(function () use ($data, &$staff) {
+            // Serialize validation and consumption so simultaneous requests cannot
+            // both use the same reset token successfully.
+            DB::table(config('auth.passwords.users.table'))->where('email', $data['email'])->lockForUpdate()->first();
+
+            return Password::reset($data + ['is_active' => true], function (User $user, string $password) use (&$staff) {
+                DB::transaction(function () use ($user, $password) {
+                    $user->forceFill(['password' => $password, 'remember_token' => Str::random(60)])->save();
+                    DB::table('sessions')->where('user_id', $user->id_user)->delete();
+                });
+                $staff = $user->isManager();
+                event(new PasswordReset($user));
+                SecurityEvent::record('password_reset.completed', ['target_id' => $user->id_user]);
             });
-            $staff = $user->isManager();
-            event(new PasswordReset($user));
-            SecurityEvent::record('password_reset.completed', ['target_id' => $user->id_user]);
-        });
+        }, 3);
         if ($status !== Password::PASSWORD_RESET) {
             return back()->withErrors(['email' => 'Tautan reset tidak valid atau sudah kedaluwarsa. Minta tautan baru.']);
         }

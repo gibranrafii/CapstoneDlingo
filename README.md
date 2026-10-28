@@ -51,15 +51,15 @@ These accounts exist only when the reference seed was applied. Password: `demo12
 | Farm staff (Budi) | `admin` | `budi@example.com` |
 | Buyer | `pembeli` | `andi@dlingo.test` |
 
-Budi's username follows the DOCX. Actual permissions use `role`, not the username. Public registration always creates a buyer and a linked customer contact. Administrators create other staff/admin accounts. Livestock caretakers are separate contact records and do not automatically receive login accounts.
+Budi's username follows the DOCX. Actual permissions use `role`, not the username. Staff sign in at `/admin/login`; buyers use `/login`. Public registration always creates an unverified buyer and a linked customer contact. Email verification is required before checkout. Administrators create other staff/admin accounts. Livestock caretakers are separate contact records and do not automatically receive login accounts.
 
 ## Behavior and pages
 
 | Area | Routes |
 | --- | --- |
 | Public | `/`, `/products/{id}`, `/login`, `/register` |
-| Dashboards | `/dashboard/petani`, `/dashboard/admin`, `/dashboard/pembeli` |
-| Farm management | `/manage/products`, `/manage/buyers`, `/manage/stock`, `/manage/orders`, `/manage/livestock`, `/manage/caretakers` |
+| Dashboards | `/admin` (petani/admin), `/dashboard/pembeli` (buyer) |
+| Farm management | `/admin/products`, `/admin/buyers`, `/admin/stock`, `/admin/orders`, `/admin/livestock`, `/admin/caretakers` |
 | Buyer | `/cart`, `/orders` |
 | Account/admin | `/profile`, `/admin/users` |
 
@@ -94,3 +94,7 @@ All test entry points verify the exact database name before writing. The prepara
 Browser tests use `/usr/bin/chromium` by default; set `CHROMIUM_PATH` to another installed Chromium executable. `BROWSER_PORT` defaults to 8123. The temporary `.env.browser` file is ignored and removed after the run.
 
 See [database notes](docs/database.md) for schema mappings and migration details. This branch prepares the local application and remote database; web-server deployment is a separate step.
+
+## Security and production
+
+See [security model and checks](docs/security.md) and [VPS deployment/restore instructions](docs/deployment.md). The application uses cookie sessions, record-level authorization, signed email verification, password recovery, request limits and browser security headers. Two-factor authentication is deferred. Production must use SMTP, HTTPS, restricted runtime DB privileges and an atomic persistent rate-limit cache. Run `php artisan security:check` as the PHP-FPM user before public launch; local/demo defaults deliberately fail. Create the owner interactively with `php artisan security:create-admin`; never seed reference accounts in production. Deployment templates live under `deployment/`; no live VPS changes are performed automatically.

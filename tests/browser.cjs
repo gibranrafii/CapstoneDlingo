@@ -46,7 +46,7 @@ const pages = [
   try {
     let config = await fs.readFile(path.join(root,'.env.testing'),'utf8');
     assert.match(config,/^DB_DATABASE=dlingo_jamur_test\s*$/m,'Configure .env.testing for the isolated test database');
-    const values = {APP_ENV:'browser',APP_DEBUG:'false',APP_URL:base,DB_DATABASE:'dlingo_jamur_test',DB_URL:'',SESSION_DRIVER:'database',CACHE_STORE:'database'};
+    const values = {APP_ENV:'browser',APP_DEBUG:'false',APP_URL:base,DB_DATABASE:'dlingo_jamur_test',DB_URL:'',SESSION_DRIVER:'database',SESSION_ENCRYPT:'true',CACHE_STORE:'database'};
     for(const [key,value] of Object.entries(values)) {
       config = config.replace(new RegExp(`^${key}=.*$`,'mg'),'');
       config += `\n${key}=${value}\n`;
@@ -57,7 +57,7 @@ const pages = [
     const log = await fs.open(path.join(artifacts,'http-server.log'),'w');
     server = spawn('php',['artisan','serve','--host=127.0.0.1',`--port=${port}`,'--no-reload','--env=browser'],{
       cwd:root,detached:true,stdio:['ignore',log.fd,log.fd],
-      env:{...process.env,APP_ENV:'browser',DB_DATABASE:'dlingo_jamur_test',DB_URL:'',SESSION_DRIVER:'database',CACHE_STORE:'database',APP_DEBUG:'false'}
+      env:{...process.env,APP_ENV:'browser',DB_DATABASE:'dlingo_jamur_test',DB_URL:'',SESSION_DRIVER:'database',SESSION_ENCRYPT:'true',CACHE_STORE:'database',APP_DEBUG:'false'}
     });
     await log.close();
     for(let attempt=0;;attempt++) {

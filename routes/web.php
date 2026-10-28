@@ -15,6 +15,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\UsersController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [StoreController::class, 'index'])->name('store');
@@ -37,11 +39,25 @@ Route::middleware('auth')->group(function () {
     Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend'])->name('verification.send');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/dashboard', fn () => redirect()->route(auth()->user()->isManager() ? 'admin.dashboard' : 'dashboard.pembeli'))->name('dashboard');
+    Route::get('/profile', function (ProfileController $profile, Request $request) {
+        if ($request->user()->isManager()) {
+            return redirect()->route('admin.profile');
+        }
+        Gate::authorize('buy');
+
+        return $profile->edit($request);
+    })->name('profile');
+    Route::get('/orders/{id}', function (OrdersController $orders, Request $request, int $id) {
+        if ($request->user()->isManager()) {
+            return redirect()->route('admin.orders.show', $id);
+        }
+        Gate::authorize('buy');
+
+        return $orders->show($request, $id);
+    })->whereNumber('id')->name('orders.show');
     Route::middleware('can:buy')->group(function () {
         Route::get('/dashboard/pembeli', [DashboardController::class, 'buyer'])->name('dashboard.pembeli');
-        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile');
         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
-        Route::get('/orders/{id}', [OrdersController::class, 'show'])->whereNumber('id')->name('orders.show');
         Route::get('/cart', [CartController::class, 'index'])->name('cart');
         Route::post('/cart/{id}', [CartController::class, 'add'])->whereNumber('id')->name('cart.add')->block();
         Route::patch('/cart/{id}', [CartController::class, 'update'])->whereNumber('id')->name('cart.update')->block();

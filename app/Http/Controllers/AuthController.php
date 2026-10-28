@@ -23,7 +23,7 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $data = $request->validate(['username' => ['required', 'string', 'max:255'], 'password' => ['required', 'string'], 'remember' => ['nullable', 'boolean']]);
+        $data = $request->validate(['username' => ['required', 'string', 'max:255'], 'password' => ['required', 'string', new PasswordBytes], 'remember' => ['nullable', 'boolean']]);
         $identity = trim($data['username']);
         $key = app()->environment().':login:'.hash('sha256', mb_strtolower($identity).'|'.$request->ip());
         $staff = $request->is('admin/*');

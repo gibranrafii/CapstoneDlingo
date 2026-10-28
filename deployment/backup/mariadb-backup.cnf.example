@@ -1,0 +1,6 @@
+# Install as /etc/jamurtani/mariadb-backup.cnf, owned by root, mode 0600.
+[client]
+host=127.0.0.1
+port=3307
+user=jamurtani_backup
+password=__SET_PRIVATE_BACKUP_PASSWORD__

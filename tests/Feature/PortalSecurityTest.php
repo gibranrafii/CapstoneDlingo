@@ -48,6 +48,8 @@ class PortalSecurityTest extends TestCase
     {
         $this->get('/admin')->assertRedirect('/admin/login');
         $this->actingAs(User::find(2))->get('/manage/products')->assertRedirect('/admin/products');
+        $this->get('/profile')->assertRedirect('/admin/profile');
+        $this->get('/orders/1')->assertRedirect('/admin/orders/1');
         $this->post('/manage/products')->assertMethodNotAllowed();
     }
 
