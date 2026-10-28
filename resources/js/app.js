@@ -7,6 +7,17 @@ const openDialog = dialog => {
   dialog.showModal();
 };
 const urls = new Map();
+document.querySelectorAll('[data-password-toggle]').forEach(button => {
+  const input = document.getElementById(button.getAttribute('aria-controls'));
+  if (!input || input.type !== 'password') return;
+  button.hidden = false;
+  button.addEventListener('click', () => {
+    const visible = input.type === 'password';
+    input.type = visible ? 'text' : 'password';
+    button.setAttribute('aria-pressed', String(visible));
+    button.setAttribute('aria-label', visible ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi');
+  });
+});
 document.addEventListener('click', event => {
   const open=event.target.closest('[data-open]');if(open){event.preventDefault();openDialog(document.getElementById(open.dataset.open));}
   const close=event.target.closest('[data-close]');if(close)close.closest('dialog')?.close();

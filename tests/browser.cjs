@@ -71,6 +71,53 @@ const pages = [
       contexts[role] = await fresh();
       if(username)await login(contexts[role].page,username);
     }
+    // The two portals share a layout but keep different account actions.
+    const loginPage=contexts.guest.page;
+    for(const route of ['/login','/admin/login']) {
+      for(const width of [320,390,768,1584]) {
+        await loginPage.setViewportSize({width,height:844});
+        await go(loginPage,route);
+        assert.ok(await loginPage.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`${route}: overflow at ${width}px`);
+        const submitBox=await loginPage.getByRole('button',{name:'Masuk',exact:true}).boundingBox();
+        assert.ok(submitBox.width>=44&&submitBox.height>=44,'Login submit touch target');
+      }
+      assert.equal(await loginPage.locator('[name=remember]').count(),route==='/login'?1:0);
+      assert.equal(await loginPage.getByRole('link',{name:'Buat akun pembeli',exact:true}).count(),route==='/login'?1:0);
+      const password=loginPage.locator('[name=password]');
+      await password.fill('visibility-check');
+      await password.focus();
+      await loginPage.keyboard.press('Tab');
+      const toggle=loginPage.locator('[data-password-toggle]');
+      assert.equal(await toggle.getAttribute('aria-label'),'Tampilkan kata sandi');
+      assert.equal(await toggle.evaluate(el=>el===document.activeElement),true,'Password toggle is keyboard reachable');
+      await loginPage.keyboard.press('Enter');
+      assert.equal(await password.getAttribute('type'),'text');
+      assert.equal(await password.inputValue(),'visibility-check');
+      assert.equal(await toggle.getAttribute('aria-pressed'),'true');
+      assert.equal(await toggle.getAttribute('aria-label'),'Sembunyikan kata sandi');
+      await loginPage.keyboard.press('Space');
+      assert.equal(await password.getAttribute('type'),'password');
+      assert.equal(new URL(loginPage.url()).pathname,route,'Toggle does not submit the form');
+    }
+    await go(loginPage,'/login');
+    await loginPage.locator('[name=username]').fill('login-feedback-check');
+    await loginPage.locator('[name=password]').fill('incorrect-password');
+    await submit(loginPage,loginPage.getByRole('button',{name:'Masuk',exact:true}));
+    assert.equal(await loginPage.locator('[role=alert]').isVisible(),true,'Failed login displays feedback');
+    assert.equal(await loginPage.locator('[name=username]').inputValue(),'login-feedback-check');
+    assert.equal(await loginPage.locator('[name=password]').inputValue(),'','Passwords are not reflected after failure');
+    for(const username of ['pembeli','admin']) {
+      const noJs=await browser.newContext({javaScriptEnabled:false,viewport:{width:390,height:844}});
+      try {
+        const page=await noJs.newPage();
+        await go(page,username==='admin'?'/admin/login':'/login');
+        assert.equal(await page.locator('[data-password-toggle]').isVisible(),false);
+        await login(page,username);
+        await page.close();
+      } finally {await noJs.close();}
+    }
+    await loginPage.setViewportSize({width:1584,height:900});
+    ok('Buyer/staff login: responsive form, keyboard password toggle, failure feedback, and authentication without JavaScript');
     for(const [route,role] of pages) {
       const page=contexts[role].page;
       await go(page,route);

@@ -1,3 +1,5 @@
+@import './auth-login.css';
+
 :root {
   --blue:#0047ab; --ink:#172b4d; --muted:#5f6f85; --paper:#f5f7fa;
   --line:#e2e8f0; --red:#b42318; --green:#15803d; --amber:#946000;
