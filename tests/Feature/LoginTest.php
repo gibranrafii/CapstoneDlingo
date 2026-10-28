@@ -10,9 +10,9 @@ class LoginTest extends TestCase
 {
     use DatabaseTransactions;
 
-    public function test_login_page_preserves_reference_and_posts_to_laravel(): void
+    public function test_login_page_shows_brand_and_posts_to_laravel(): void
     {
-        $this->get('/login')->assertOk()->assertSee('Dashboard Peternakan')->assertSee('name="_token"', false);
+        $this->get('/login')->assertOk()->assertSee('Masuk ke JamurTani')->assertSee('name="_token"', false);
     }
 
     public function test_username_and_email_logins_authenticate_real_accounts(): void

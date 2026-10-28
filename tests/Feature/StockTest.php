@@ -15,7 +15,7 @@ class StockTest extends TestCase
     {
         $this->actingAs(User::find(2))->get('/manage/stock')->assertOk()->assertSee('183')->assertSee('Jamur Kuping');
         Product::find(2)->update(['stok' => 15]);
-        $this->get('/manage/stock')->assertOk()->assertSee('190')->assertSee('STOK MENIPIS (0)');
+        $this->get('/manage/stock')->assertOk()->assertSee('190')->assertSee('Stok menipis (0)');
         $this->actingAs(User::find(3))->get('/manage/stock')->assertForbidden();
     }
 }
