@@ -4,8 +4,9 @@
 @foreach($buyers->concat([new \App\Models\Buyer]) as $buyer)
 @php $modal=$buyer->exists?'buyer-'.$buyer->id_pembeli:'buyer-new'; @endphp
 <x-dialog :id="$modal" :title="($buyer->exists?'Edit':'Tambah').' Pembeli'" :action="$buyer->exists?route('manage.buyers.update',$buyer->id_pembeli):route('manage.buyers.store')" :method="$buyer->exists?'PUT':'POST'">
-<x-field :form="$modal" name="nama_pembeli" label="Nama Pembeli" :value="$buyer->nama_pembeli" maxlength="255" required/>
-<x-field :form="$modal" name="no_telepon_pembeli" label="No. Telepon" type="tel" :value="$buyer->no_telepon_pembeli" maxlength="50"/>
-<x-field :form="$modal" name="email_pembeli" label="Email" type="email" :value="$buyer->email_pembeli"/>
+@if($buyer->account_user_id)<p class="form-note linked-buyer-note">Nama, email, dan nomor telepon mengikuti akun pembeli. Pemilik akun dapat mengubahnya melalui Profil Saya.</p>@endif
+<x-field :readonly="(bool)$buyer->account_user_id" :form="$modal" name="nama_pembeli" label="Nama Pembeli" :value="$buyer->nama_pembeli" maxlength="255" required/>
+<x-field :readonly="(bool)$buyer->account_user_id" :form="$modal" name="no_telepon_pembeli" label="No. Telepon" type="tel" :value="$buyer->no_telepon_pembeli" maxlength="50"/>
+<x-field :readonly="(bool)$buyer->account_user_id" :form="$modal" name="email_pembeli" label="Email" type="email" :value="$buyer->email_pembeli"/>
 <x-field :form="$modal" name="alamat_pembeli" label="Alamat" type="textarea" :value="$buyer->alamat_pembeli" maxlength="255"/>
 </x-dialog>@endforeach</x-layout>

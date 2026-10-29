@@ -3,7 +3,9 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const {execFileSync, spawn} = require('node:child_process');
-const {chromium} = require('playwright');
+const browserTypes = require('playwright');
+const browserEngine = process.env.BROWSER_ENGINE || 'chromium';
+assert.ok(['chromium','firefox','webkit'].includes(browserEngine),'BROWSER_ENGINE must be chromium, firefox, or webkit');
 const root = path.resolve(__dirname, '..');
 const port = Number(process.env.BROWSER_PORT || 8123);
 const base = `http://127.0.0.1:${port}`;
@@ -34,12 +36,12 @@ const pages = [
   async function submit(page, button) {
     await Promise.all([page.waitForNavigation({waitUntil:'domcontentloaded'}),button.click()]);
   }
-  async function login(page, username, password='demo12345') {
-    await go(page,['admin','superadmin','browserstaff'].includes(username)?'/admin/login':'/login');
+  async function login(page, username, password='demo12345', expectedPath=null) {
+    await go(page,['petani','superadmin','browserstaff'].includes(username)?'/admin/login':'/login');
     await page.locator('[name=username]').fill(username);
     await page.locator('[name=password]').fill(password);
     await submit(page,page.getByRole('button',{name:'Masuk',exact:true}));
-    await page.waitForURL(url=>['/admin','/dashboard/pembeli'].includes(url.pathname));
+    await page.waitForURL(url=>expectedPath ? url.pathname===expectedPath : ['/admin','/dashboard/pembeli'].includes(url.pathname));
   }
   const dialog = page => page.locator('dialog[open]');
   const save = async (page, label='Simpan') => { const current=dialog(page).locator('[name=current_password]');if(await current.count())await current.fill('demo12345');return submit(page,dialog(page).getByRole('button',{name:label,exact:true})); };
@@ -66,8 +68,10 @@ const pages = [
       if(attempt>60)throw Error('Laravel test server did not start');
       await new Promise(resolve=>setTimeout(resolve,250));
     }
-    browser = await chromium.launch({headless:true,executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox']});
-    for(const [role,username] of Object.entries({guest:null,petani:'admin',pembeli:'pembeli',admin:'superadmin'})) {
+    browser = await browserTypes[browserEngine].launch({headless:true,
+      executablePath:process.env.BROWSER_EXECUTABLE_PATH || (browserEngine==='chromium' ? process.env.CHROMIUM_PATH||'/usr/bin/chromium' : undefined),
+      args:browserEngine==='chromium' ? ['--no-sandbox'] : []});
+    for(const [role,username] of Object.entries({guest:null,petani:'petani',pembeli:'pembeli',admin:'superadmin'})) {
       contexts[role] = await fresh();
       if(username)await login(contexts[role].page,username);
     }
@@ -106,11 +110,11 @@ const pages = [
     assert.equal(await loginPage.locator('[role=alert]').isVisible(),true,'Failed login displays feedback');
     assert.equal(await loginPage.locator('[name=username]').inputValue(),'login-feedback-check');
     assert.equal(await loginPage.locator('[name=password]').inputValue(),'','Passwords are not reflected after failure');
-    for(const username of ['pembeli','admin']) {
+    for(const username of ['pembeli','petani']) {
       const noJs=await browser.newContext({javaScriptEnabled:false,viewport:{width:390,height:844}});
       try {
         const page=await noJs.newPage();
-        await go(page,username==='admin'?'/admin/login':'/login');
+        await go(page,username==='petani'?'/admin/login':'/login');
         assert.equal(await page.locator('[data-password-toggle]').isVisible(),false);
         await login(page,username);
         await page.close();
@@ -233,7 +237,11 @@ const pages = [
     ok('Missing photo fallback, long names, sold-out products, and stale-stock checkout');
 
 
-    await go(staff,'/admin/buyers');await staff.locator('[data-open=buyer-new]').first().click();await dialog(staff).locator('[name=nama_pembeli]').fill('Browser Customer');await save(staff);
+    await go(staff,'/admin/buyers');await staff.locator('[data-open=buyer-1]').click();
+    for(const field of ['nama_pembeli','email_pembeli','no_telepon_pembeli'])assert.equal(await dialog(staff).locator(`[name=${field}]`).isEditable(),false,'Linked account identity is read-only');
+    assert.equal(await dialog(staff).locator('[name=alamat_pembeli]').isEditable(),true);
+    await staff.keyboard.press('Escape');
+    await staff.locator('[data-open=buyer-new]').first().click();await dialog(staff).locator('[name=nama_pembeli]').fill('Browser Customer');await save(staff);
     await staff.getByRole('button',{name:'Hapus Browser Customer',exact:true}).click();await save(staff,'Hapus');
     await go(staff,'/admin/caretakers');await staff.locator('[data-open=caretaker-new]').first().click();await dialog(staff).locator('[name=nama_pengurus]').fill('Browser Caretaker');await save(staff);
     await go(staff,'/admin/livestock');await staff.getByRole('button',{name:'Edit Sapi Brahman',exact:true}).click();await dialog(staff).getByLabel('Browser Caretaker',{exact:true}).check();await save(staff);await staff.reload();
@@ -290,7 +298,26 @@ const pages = [
     await go(buyer,'/orders');assert.match(await buyer.locator('.order-card').first().innerText(),/Selesai/);
     await go(staff,'/admin');assert.match(await staff.locator('.stat').filter({hasText:'Pemasukan'}).innerText(),/15.000/);
     await staff.locator('main').getByRole('button',{name:'Rekening',exact:true}).click();assert.equal(await dialog(staff).locator('input').count(),0);await dialog(staff).getByRole('button',{name:'Tutup dialog',exact:true}).click();
-    await staff.locator('main').getByRole('button',{name:'Upload File',exact:true}).click();await dialog(staff).locator('input[type=file]').setInputFiles({name:'preview.png',mimeType:'image/png',buffer:png});await dialog(staff).locator('.file-preview').waitFor();await dialog(staff).getByRole('button',{name:'Tutup dialog',exact:true}).click();
+    assert.equal(await staff.getByRole('button',{name:'Upload File',exact:true}).count(),0);
+    for(const [page,route] of [[buyer,`/orders/${ownOrder}`],[staff,`/admin/orders/${orderId}`]]) {
+      await go(page,route);
+      assert.match(await page.locator('h1').innerText(),/Detail Pesanan/);
+      assert.equal(await page.locator('#app-main .payment-note').isVisible(),true);
+      assert.equal(await page.locator('.bottom-nav,.sidebar').count()>0,true);
+    }
+    for(const [page,route] of [[staff,'/admin/orders'],[admin,'/admin/users']]) {
+      for(const width of [320,390]) {
+        await page.setViewportSize({width,height:844});await go(page,route);
+        const table=page.locator('.mobile-cards');
+        assert.equal(await table.isVisible(),true);
+        const cells=await table.locator('tbody td').evaluateAll(els=>els.map(el=>({left:el.getBoundingClientRect().left,right:el.getBoundingClientRect().right})));
+        assert.ok(cells.every(cell=>cell.left>=0&&cell.right<=width),`${route}: all mobile fields fit`);
+        assert.equal(await table.locator('[data-label=Status]').first().isVisible(),true);
+        if(route==='/admin/orders')assert.equal(await table.locator('[data-label=Total]').first().isVisible(),true);
+        assert.ok(await table.getByRole('cell').count()>0,'Responsive cards retain table cell semantics');
+      }
+      await page.setViewportSize({width:1584,height:900});
+    }
     ok('Staff orders progress through all statuses and completed revenue updates');
 
     await go(admin,'/admin/users');await admin.locator('[data-open=user-new]').first().click();
@@ -299,7 +326,9 @@ const pages = [
     const extra=await fresh();await login(extra.page,'browserstaff','password12345');
     assert.equal((await extra.context.request.get(base+'/admin/users')).status(),403);
     await admin.getByRole('button',{name:'Hapus Browser Staff (nonaktifkan akun)',exact:true}).click();await save(admin,'Hapus');
-    await go(extra.page,'/admin/profile');assert.equal(new URL(extra.page.url()).pathname,'/admin/login');await extra.context.close();
+    await go(extra.page,'/admin/profile');assert.equal(new URL(extra.page.url()).pathname,'/admin/login');
+    await admin.getByRole('button',{name:'Aktifkan Browser Staff',exact:true}).click();await save(admin,'Aktifkan Akun');
+    await login(extra.page,'browserstaff','password12345','/admin/profile');await extra.context.close();
     await go(admin,'/admin/profile');await admin.locator('main').getByRole('button',{name:'Rekening',exact:true}).click();await dialog(admin).locator('[name=no_rekening]').fill('9876543210');await save(admin);
     await go(buyer,'/products/1');assert.match(await buyer.locator('main').innerText(),/9876543210/);
     ok('Admin-only accounts, deactivation invalidates sessions, and bank settings are shared');

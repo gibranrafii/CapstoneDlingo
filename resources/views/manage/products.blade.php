@@ -7,7 +7,7 @@
 <x-dialog :id="$modal" :title="($product->exists?'Edit':'Tambah').' Produk'" :action="$product->exists?route('manage.products.update',$product->id_produk):route('manage.products.store')" :method="$product->exists?'PUT':'POST'">
 <x-field :form="$modal" name="nama_produk" label="Nama Produk" :value="$product->nama_produk" maxlength="255" required/>
 <x-field :form="$modal" name="kategori" label="Kategori" type="select" :value="$product->kategori??'Jamur'" :options="['Jamur'=>'Jamur','Baglog'=>'Baglog','Bibit'=>'Bibit','Olahan'=>'Olahan']"/>
-<x-field :form="$modal" name="harga" label="Harga (Rp)" type="number" :value="$product->harga??0" min="0" max="9999999999.99" step="0.01" required/>
+<x-field :form="$modal" name="harga" label="Harga (Rp)" type="number" :value="$product->harga??1" min="1" max="9999999999.99" step="0.01" required/>
 <x-field :form="$modal" name="satuan" label="Satuan" type="select" :value="$product->satuan??'kg'" :options="['kg'=>'kg','pcs'=>'pcs','pack'=>'pack','baglog'=>'baglog']"/>
 <x-field :form="$modal" name="stok" label="Stok" type="number" :value="$product->stok??0" min="0" max="2147483647" step="1" required/>
 <x-field :form="$modal" name="deskripsi" label="Deskripsi" type="textarea" :value="$product->deskripsi" maxlength="255"/>

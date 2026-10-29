@@ -31,7 +31,7 @@ class RegistrationTest extends TestCase
         $this->post('/register', $this->data() + ['role' => 'admin'])->assertSessionHasErrors('role');
         $this->assertGuest();
         $d = $this->data();
-        $d['username'] = 'admin';
+        $d['username'] = 'petani';
         $this->post('/register', $d)->assertSessionHasErrors('username');
     }
 }

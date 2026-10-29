@@ -24,4 +24,19 @@ class BuyersTest extends TestCase
         $this->delete('/admin/buyers/1')->assertSessionHas('error');
         $this->assertNotNull(Buyer::find(1));
     }
+
+    public function test_staff_cannot_change_linked_account_identity_but_can_edit_the_address(): void
+    {
+        $buyer = Buyer::find(1);
+        $accountEmail = User::find(3)->email;
+        $original = $buyer->only(['nama_pembeli', 'email_pembeli', 'no_telepon_pembeli']);
+        $this->actingAs(User::find(2))->get('/admin/buyers')->assertOk()->assertSee('linked-buyer-note');
+        foreach (['nama_pembeli' => 'Different name', 'email_pembeli' => 'different@example.test', 'no_telepon_pembeli' => '0812999'] as $field => $value) {
+            $this->put('/admin/buyers/1', array_replace($original, [$field => $value]))->assertSessionHasErrors($field);
+            $this->assertSame($original, $buyer->fresh()->only(array_keys($original)));
+        }
+        $this->put('/admin/buyers/1', $original + ['alamat_pembeli' => 'Alamat baru'])->assertRedirect();
+        $this->assertSame('Alamat baru', $buyer->fresh()->alamat_pembeli);
+        $this->assertSame($accountEmail, User::find(3)->email);
+    }
 }

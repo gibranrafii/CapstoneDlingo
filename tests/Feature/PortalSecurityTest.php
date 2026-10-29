@@ -13,11 +13,11 @@ class PortalSecurityTest extends TestCase
 
     public function test_credentials_are_restricted_to_their_login_portal(): void
     {
-        $this->post('/login', ['username' => 'admin', 'password' => 'demo12345'])->assertSessionHasErrors('username');
+        $this->post('/login', ['username' => 'petani', 'password' => 'demo12345'])->assertSessionHasErrors('username');
         $this->assertGuest();
         $this->post('/admin/login', ['username' => 'pembeli', 'password' => 'demo12345'])->assertSessionHasErrors('username');
         $this->assertGuest();
-        $this->post('/admin/login', ['username' => 'admin', 'password' => 'demo12345', 'remember' => 1])
+        $this->post('/admin/login', ['username' => 'petani', 'password' => 'demo12345', 'remember' => 1])
             ->assertRedirect('/admin')->assertCookieMissing(Auth::getRecallerName());
         $this->assertAuthenticatedAs(User::find(2));
     }

@@ -30,7 +30,13 @@ class OrdersController extends Controller
         $order = Order::with('buyer')->findOrFail($id);
         abort_unless($order->canBeViewedBy($r->user()), 403);
 
-        return response()->view('partials.order-detail', ['order' => $order, 'lines' => $order->lines(), 'farm' => app(FarmSetting::class)])->header('X-Dlingo-Order', '1');
+        $response = response()->view($r->ajax() ? 'partials.order-detail' : 'orders.show', ['order' => $order, 'lines' => $order->lines(), 'farm' => app(FarmSetting::class)])
+            ->header('Vary', 'X-Requested-With');
+        if ($r->ajax()) {
+            $response->header('X-Dlingo-Order', '1');
+        }
+
+        return $response;
     }
 
     public function transition(Request $r, int $id, OrderService $service)
@@ -45,6 +51,6 @@ class OrdersController extends Controller
     {
         $service->transition($r->user(), $id, 'dibatalkan');
 
-        return redirect()->route('buyer.orders')->with('success','Pesanan dibatalkan. Stok telah dikembalikan.');
+        return redirect()->route('buyer.orders')->with('success', 'Pesanan dibatalkan. Stok telah dikembalikan.');
     }
 }

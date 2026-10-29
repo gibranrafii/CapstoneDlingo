@@ -25,20 +25,27 @@ class AuthController extends Controller
     {
         $data = $request->validate(['username' => ['required', 'string', 'max:255'], 'password' => ['required', 'string', new PasswordBytes], 'remember' => ['nullable', 'boolean']]);
         $identity = trim($data['username']);
-        $key = app()->environment().':login:'.hash('sha256', mb_strtolower($identity).'|'.$request->ip());
+        $column = filter_var($identity, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        $accountId = User::where($column, $identity)->value('id_user');
+        $accountHash = hash_hmac('sha256', $accountId ? 'user:'.$accountId : 'identity:'.mb_strtolower($identity), config('app.key'));
+        $prefix = app()->environment().':login:';
+        $key = $prefix.'ip:'.hash('sha256', $accountHash.'|'.$request->ip());
+        $accountKey = $prefix.'account:'.$accountHash;
         $staff = $request->is('admin/*');
         $identityHash = hash_hmac('sha256', mb_strtolower($identity), config('app.key'));
-        if (RateLimiter::tooManyAttempts($key, config('security.limits.failed_login'))) {
+        if (RateLimiter::tooManyAttempts($key, config('security.limits.failed_login')) || RateLimiter::tooManyAttempts($accountKey, config('security.limits.failed_login_account'))) {
             SecurityEvent::record('login.throttled', ['identity_hash' => $identityHash]);
-            abort(response('Terlalu banyak percobaan. Silakan coba lagi.', 429)->header('Retry-After', RateLimiter::availableIn($key)));
+            abort(response('Terlalu banyak percobaan. Silakan coba lagi.', 429)->header('Retry-After', max(RateLimiter::availableIn($key), RateLimiter::availableIn($accountKey))));
         }
-        $column = filter_var($identity, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
         if (! Auth::attemptWhen([$column => $identity, 'password' => $data['password'], 'is_active' => 1], fn (User $user) => $staff ? $user->isManager() : $user->role === 'pembeli', ! $staff && $request->boolean('remember'))) {
-            RateLimiter::hit($key, 60);
+            RateLimiter::hit($key, config('security.login_decay_seconds'));
+            RateLimiter::hit($accountKey, config('security.login_decay_seconds'));
             SecurityEvent::record('login.failed', ['identity_hash' => $identityHash]);
             throw ValidationException::withMessages(['username' => 'Username atau kata sandi salah.']);
         }
         RateLimiter::clear($key);
+        // Keep the account-wide failure history until expiry; a valid login must
+        // not reset protection against attempts from other addresses.
         SecurityEvent::record('login.succeeded');
         $request->session()->regenerate();
 

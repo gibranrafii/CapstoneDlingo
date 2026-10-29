@@ -49,6 +49,6 @@ class CaretakersController extends Controller
             Activity::record('Pengurus '.$staff->nama_pengurus.' diarsipkan', 'Pengurus');
         });
 
-        return redirect()->route('manage.caretakers.index')->with('success','Pengurus dihapus dari daftar aktif; riwayat kontrak disimpan.');
+        return redirect()->route('manage.caretakers.index')->with('success', 'Pengurus dihapus dari daftar aktif; riwayat kontrak disimpan.');
     }
 }

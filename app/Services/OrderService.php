@@ -94,7 +94,7 @@ class OrderService
                 }
             }
             $order->update(['status' => $status]);
-            Activity::record('Pesanan '.Ui::code('PSN',$orderId).': '.$status, 'Pesanan', $actor);
+            Activity::record('Pesanan '.Ui::code('PSN', $orderId).': '.$status, 'Pesanan', $actor);
 
             return $order;
         }, 3);

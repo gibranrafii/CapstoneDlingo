@@ -21,6 +21,7 @@ class DatabaseFoundationTest extends TestCase
         $this->assertSame(3, Product::count());
         $this->assertEquals(183, Product::sum('stok'));
         $this->assertTrue(password_verify('demo12345', User::findOrFail(2)->password));
+        $this->assertSame('petani', User::findOrFail(2)->username);
     }
 
     public function test_adoption_is_idempotent(): void

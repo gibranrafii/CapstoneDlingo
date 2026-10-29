@@ -22,7 +22,7 @@ class SecurityCheck extends Command
         $key = (string) config('app.key');
         $key = str_starts_with($key, 'base64:') ? base64_decode(substr($key, 7), true) : $key;
         $checks = [
-            'Production environment' => app()->isProduction(),
+            'Hardened deployment environment' => app()->environment(['production', 'staging']),
             'Debug disabled' => config('app.debug') === false,
             'Application key configured' => is_string($key) && Encrypter::supported($key, config('app.cipher')),
             'Real HTTPS application URL' => str_starts_with((string) config('app.url'), 'https://') && ! str_contains($host, '__') && ! in_array($host, ['localhost', '127.0.0.1', 'example.com', '']) && ! str_ends_with($host, '.test') && ! str_ends_with($host, '.example'),

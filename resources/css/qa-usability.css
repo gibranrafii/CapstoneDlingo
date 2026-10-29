@@ -1,0 +1,13 @@
+.guest-order-note a,.breadcrumbs a{display:inline-flex;align-items:center;min-height:44px;text-underline-offset:3px}
+.linked-buyer-note{margin:0 0 20px;padding:12px 14px;background:#eff5fc;border-radius:8px}
+.input[readonly]{background:#f1f5f9;color:#52657d}
+@media(max-width:639px){
+ .table-wrap.mobile-cards{border:0;background:transparent;overflow:visible}
+ .mobile-cards .data-table,.mobile-cards .data-table tbody{display:block;width:100%;min-width:0}
+ .mobile-cards .data-table thead{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+ .mobile-cards .data-table tbody tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;padding:18px;margin-bottom:14px;border:1px solid var(--line);border-radius:12px;background:#fff}
+ .mobile-cards .data-table td{display:block;min-width:0;padding:0;border:0;overflow-wrap:anywhere}
+ .mobile-cards .data-table td:before{content:attr(data-label);display:block;margin-bottom:4px;color:var(--muted);font-size:12px;font-weight:400}
+ .mobile-cards td[data-label="Nama"],.mobile-cards td[data-label="Email"],.mobile-cards td[data-label="Pembeli"],.mobile-cards td[data-label="Status"],.mobile-cards td[data-label="Aksi"],.mobile-cards td.empty{grid-column:1/-1}
+ .mobile-cards .actions{flex-wrap:wrap}
+}

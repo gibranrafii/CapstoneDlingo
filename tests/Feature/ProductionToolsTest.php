@@ -54,9 +54,17 @@ class ProductionToolsTest extends TestCase
         $this->assertDatabaseHas('sessions', ['id' => 'live']);
     }
 
+    public function test_reference_seeder_refuses_staging(): void
+    {
+        $this->app->instance('env', 'staging');
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Reference/demo accounts cannot be seeded');
+        (new ReferenceSeeder)->run();
+    }
+
     public function test_readiness_check_reports_local_defaults_without_exposing_secrets(): void
     {
-        $this->artisan('security:check')->expectsOutputToContain('FAIL Production environment')
+        $this->artisan('security:check')->expectsOutputToContain('FAIL Hardened deployment environment')
             ->expectsOutputToContain('FAIL No active reference passwords')->assertFailed();
     }
 

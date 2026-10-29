@@ -55,4 +55,16 @@ class OrdersTest extends TestCase
         $this->assertSame('selesai', $order->fresh()->status);
         $this->assertSame(24, Product::find(1)->stok);
     }
+
+    public function test_direct_order_links_render_a_page_and_ajax_links_render_only_the_dialog(): void
+    {
+        $order = app(OrderService::class)->create(User::find(2), 1, [1 => 1], 'Dlingo');
+        foreach ([2 => '/admin/orders/', 3 => '/orders/'] as $userId => $prefix) {
+            $this->actingAs(User::find($userId))->get($prefix.$order->id_pesanan)->assertOk()
+                ->assertViewIs('orders.show')->assertSee('<!doctype html>', false)->assertSee('Detail Pesanan');
+            $this->get($prefix.$order->id_pesanan, ['X-Requested-With' => 'XMLHttpRequest'])->assertOk()
+                ->assertHeader('X-Dlingo-Order', '1')->assertHeader('Vary', 'X-Requested-With')
+                ->assertViewIs('partials.order-detail')->assertDontSee('<!doctype html>', false);
+        }
+    }
 }

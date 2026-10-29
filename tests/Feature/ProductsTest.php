@@ -32,4 +32,15 @@ class ProductsTest extends TestCase
         $this->actingAs(User::find(3))->post('/admin/products', $this->data())->assertForbidden();
         $this->actingAs(User::find(2))->post('/admin/products', array_replace($this->data(), ['stok' => -1]))->assertSessionHasErrors('stok');
     }
+
+    public function test_products_must_cost_at_least_one_rupiah_on_create_and_update(): void
+    {
+        $this->actingAs(User::find(2));
+        foreach ([0, '0.99', -1] as $price) {
+            $this->post('/admin/products', array_replace($this->data(), ['harga' => $price]))->assertSessionHasErrors('harga');
+            $this->put('/admin/products/1', array_replace($this->data(), ['harga' => $price]))->assertSessionHasErrors('harga');
+        }
+        $this->assertEquals(15000, Product::find(1)->harga);
+        $this->post('/admin/products', array_replace($this->data(), ['harga' => 1]))->assertRedirect();
+    }
 }

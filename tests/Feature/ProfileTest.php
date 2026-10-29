@@ -13,7 +13,7 @@ class ProfileTest extends TestCase
 
     private function fields(): array
     {
-        return ['username' => 'admin', 'nama' => 'Budi Uji', 'email' => 'budi@example.com', 'no_telepon' => '0812345'];
+        return ['username' => 'petani', 'nama' => 'Budi Uji', 'email' => 'budi@example.com', 'no_telepon' => '0812345'];
     }
 
     public function test_profile_updates_persist_without_changing_role(): void
@@ -37,5 +37,16 @@ class ProfileTest extends TestCase
         $this->actingAs(User::find(2))->post('/admin/farm/settings', $data)->assertForbidden();
         $this->actingAs(User::find(1))->post('/admin/farm/settings', $data)->assertRedirect();
         $this->assertSame('BNI', FarmSetting::find(1)->nama_bank);
+    }
+
+    public function test_checkout_verification_banner_is_only_shown_to_unverified_buyers(): void
+    {
+        User::whereIn('id_user', [1, 2, 3])->update(['email_verified_at' => null]);
+        foreach ([1, 2] as $id) {
+            $this->actingAs(User::find($id))->get('/admin/profile')->assertOk()->assertDontSee('Verifikasi email sebelum membuat pesanan.');
+        }
+        $this->actingAs(User::find(3))->get('/profile')->assertOk()->assertSee('Verifikasi email sebelum membuat pesanan.');
+        User::find(3)->update(['email_verified_at' => now()]);
+        $this->actingAs(User::find(3))->get('/profile')->assertOk()->assertDontSee('Verifikasi email sebelum membuat pesanan.');
     }
 }

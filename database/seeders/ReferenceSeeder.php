@@ -10,8 +10,8 @@ class ReferenceSeeder extends Seeder
 {
     public function run(): void
     {
-        if (app()->isProduction()) {
-            throw new \RuntimeException('Reference/demo accounts cannot be seeded in production. Use security:create-admin.');
+        if (app()->environment(['production', 'staging'])) {
+            throw new \RuntimeException('Reference/demo accounts cannot be seeded in production or staging. Use security:create-admin.');
         }
         foreach (['user', 'pembeli', 'product', 'ternak', 'pengurus', 'pengurus_ternak', 'pesanan', 'detail_pesanan'] as $table) {
             if (DB::table($table)->exists()) {

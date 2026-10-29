@@ -26,7 +26,6 @@
 </x-dialog>
 <x-dialog id="history" title="Riwayat Aktivitas">@include('partials.activity',['activities'=>\Illuminate\Support\Facades\DB::table('activity_logs')->when(!auth()->user()->isManager(),fn($q)=>$q->where('user_id',auth()->id()))->latest('id')->limit(30)->get()])</x-dialog>
 @can('manage-farm')
-<x-dialog id="upload" title="Upload File"><x-field name="file" label="Pilih file gambar atau dokumen" type="file" data-preview="upload-preview" accept="image/*,.pdf,.csv,.txt,.docx"/><p class="form-note">File hanya dipratinjau di perangkat Anda.</p><div id="upload-preview" aria-live="polite"></div></x-dialog>
 <dialog class="dialog" id="delete-record" aria-labelledby="delete-title"><form method="POST" id="delete-form">@csrf @method('DELETE')<header class="dialog-header"><h2 id="delete-title">Hapus Data</h2><button type="button" class="dialog-close" data-close aria-label="Tutup dialog">×</button></header><div class="dialog-body"><p id="delete-message"></p>@if($page==='users')<x-field form="delete-record" name="current_password" label="Kata Sandi Anda Saat Ini" type="password" autocomplete="current-password" required/>@endif<footer class="dialog-footer"><button type="button" class="button secondary" data-close>Batal</button><button type="submit" class="button danger">Hapus</button></footer></div></form></dialog>
 @endcan
 @endauth

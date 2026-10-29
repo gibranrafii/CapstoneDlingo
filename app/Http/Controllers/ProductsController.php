@@ -32,7 +32,7 @@ class ProductsController extends Controller
 
     private function save(Request $r, Product $product)
     {
-        $data = $r->validate(['nama_produk' => ['required', 'string', 'max:255'], 'deskripsi' => ['nullable', 'string', 'max:255'], 'kategori' => ['required', 'in:Jamur,Baglog,Bibit,Olahan'], 'harga' => ['required', 'numeric', 'min:0', 'max:9999999999.99', 'decimal:0,2'], 'satuan' => ['required', 'in:kg,pcs,pack,baglog'], 'stok' => ['required', 'integer', 'min:0', 'max:2147483647'], 'gambar' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:2048', 'dimensions:max_width=4096,max_height=4096'], 'remove_image' => ['nullable', 'boolean']]);
+        $data = $r->validate(['nama_produk' => ['required', 'string', 'max:255'], 'deskripsi' => ['nullable', 'string', 'max:255'], 'kategori' => ['required', 'in:Jamur,Baglog,Bibit,Olahan'], 'harga' => ['required', 'numeric', 'min:1', 'max:9999999999.99', 'decimal:0,2'], 'satuan' => ['required', 'in:kg,pcs,pack,baglog'], 'stok' => ['required', 'integer', 'min:0', 'max:2147483647'], 'gambar' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:2048', 'dimensions:max_width=4096,max_height=4096'], 'remove_image' => ['nullable', 'boolean']]);
         unset($data['gambar'],$data['remove_image']);
         $old = $product->gambar;
         $path = $r->file('gambar')?->store('products', 'public');
