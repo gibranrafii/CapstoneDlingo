@@ -6,6 +6,7 @@ use App\Models\Buyer;
 use App\Models\Caretaker;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class UsersTest extends TestCase
@@ -46,5 +47,21 @@ class UsersTest extends TestCase
         $this->actingAs(User::find(1))->put('/admin/users/3', ['current_password' => 'demo12345', 'nama' => 'Andi Updated', 'username' => 'pembeli', 'email' => 'andi@dlingo.test', 'role' => 'pembeli'])->assertRedirect();
         $this->assertSame(2, Buyer::find(1)->id_user);
         $this->assertSame('Andi Updated', Buyer::find(1)->nama_pembeli);
+    }
+
+    public function test_inactive_accounts_remain_visible_and_require_admin_reauthentication_to_restore(): void
+    {
+        $user = User::find(2);
+        $user->update(['is_active' => false, 'remember_token' => 'old-token']);
+        DB::table('sessions')->insert(['id' => 'inactive-session', 'user_id' => 2, 'payload' => '', 'last_activity' => time()]);
+        $this->actingAs(User::find(3))->post('/admin/users/2/reactivate', ['current_password' => 'demo12345'])->assertForbidden();
+        $this->actingAs(User::find(1))->get('/admin/users')->assertOk()->assertSee('Nonaktif')->assertSee('Aktifkan Budi Santoso');
+        $this->post('/admin/users/2/reactivate', ['current_password' => 'wrong'])->assertSessionHasErrors('current_password');
+        $this->assertFalse($user->fresh()->is_active);
+        $this->post('/admin/users/2/reactivate', ['current_password' => 'demo12345'])->assertRedirect('/admin/users');
+        $this->assertTrue($user->fresh()->is_active);
+        $this->assertNotSame('old-token', $user->fresh()->remember_token);
+        $this->assertDatabaseMissing('sessions', ['id' => 'inactive-session']);
+        $this->assertDatabaseHas('product', ['id_user' => 2]);
     }
 }

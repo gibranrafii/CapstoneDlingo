@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Services\Activity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class BuyersController extends Controller
 {
@@ -28,6 +29,14 @@ class BuyersController extends Controller
     private function save(Request $r, Buyer $buyer)
     {
         $data = $r->validate(['nama_pembeli' => ['required', 'string', 'max:255'], 'no_telepon_pembeli' => ['nullable', 'string', 'max:50'], 'email_pembeli' => ['nullable', 'email', 'max:255'], 'alamat_pembeli' => ['nullable', 'string', 'max:255']]);
+        if ($buyer->account_user_id) {
+            foreach (['nama_pembeli', 'email_pembeli', 'no_telepon_pembeli'] as $field) {
+                if ($r->has($field) && (string) ($data[$field] ?? '') !== (string) $buyer->$field) {
+                    throw ValidationException::withMessages([$field => 'Data akun pembeli hanya dapat diubah melalui profil akun.']);
+                }
+                unset($data[$field]);
+            }
+        }
         DB::transaction(function () use ($buyer, $data) {
             $buyer->fill($data)->save();
             Activity::record('Pembeli '.$buyer->nama_pembeli.' disimpan', 'Pembeli');

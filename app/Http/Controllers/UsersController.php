@@ -16,7 +16,7 @@ class UsersController extends Controller
 {
     public function index()
     {
-        return view('admin.users', ['users' => User::where('is_active', true)->orderBy('id_user')->get()]);
+        return view('admin.users', ['users' => User::orderByDesc('is_active')->orderBy('id_user')->get()]);
     }
 
     public function store(Request $r)
@@ -78,6 +78,23 @@ class UsersController extends Controller
         }
 
         return redirect()->route('admin.users.index')->with('success', 'Pengguna berhasil disimpan.');
+    }
+
+    public function reactivate(Request $r, int $id)
+    {
+        $r->validate(['current_password' => ['required', 'string', 'current_password']]);
+        DB::transaction(function () use ($id) {
+            $user = User::lockForUpdate()->findOrFail($id);
+            if ($user->is_active) {
+                return;
+            }
+            $user->update(['is_active' => true, 'remember_token' => Str::random(60)]);
+            DB::table('sessions')->where('user_id', $id)->delete();
+            SecurityEvent::record('account.reactivated', ['target_id' => $id]);
+            Activity::record('Pengguna '.$user->nama.' diaktifkan kembali', 'Pengguna');
+        });
+
+        return redirect()->route('admin.users.index')->with('success', 'Akun berhasil diaktifkan kembali.');
     }
 
     public function destroy(Request $r, int $id)
