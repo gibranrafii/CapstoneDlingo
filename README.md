@@ -1,6 +1,6 @@
 # JamurTani — Desa Dlingo
 
-Laravel 13 application for mushroom sales and shared farm/livestock management. Blade renders all 17 pages; Vite bundles the shared responsive CSS and vanilla JavaScript. PHP owns authentication, validation, authorization and database writes. Node.js is only needed to build assets and run browser checks.
+Laravel 13 application for mushroom sales and shared farm/livestock management. Blade renders the application pages; Vite bundles the shared responsive CSS and vanilla JavaScript. PHP owns authentication, validation, authorization and database writes. Node.js is only needed to build assets and run browser checks.
 
 ## Local setup
 
@@ -48,10 +48,10 @@ These accounts exist only when the reference seed was applied. Password: `demo12
 | Role | Username | Email |
 | --- | --- | --- |
 | Administrator | `superadmin` | `admin@dlingo.test` |
-| Farm staff (Budi) | `admin` | `budi@example.com` |
+| Farm staff (Budi) | `petani` | `budi@example.com` |
 | Buyer | `pembeli` | `andi@dlingo.test` |
 
-Budi's username follows the DOCX. Actual permissions use `role`, not the username. Staff sign in at `/admin/login`; buyers use `/login`. Public registration always creates an unverified buyer and a linked customer contact. Email verification is required before checkout. Administrators create other staff/admin accounts. Livestock caretakers are separate contact records and do not automatically receive login accounts.
+Fresh reference databases use `petani` for farm staff; existing accounts are not renamed. Actual permissions use `role`, not the username. Staff sign in at `/admin/login`; buyers use `/login`. Public registration always creates an unverified buyer and a linked customer contact. Email verification is required before checkout. Administrators create other staff/admin accounts. Livestock caretakers are separate contact records and do not automatically receive login accounts.
 
 ## Behavior and pages
 
@@ -67,7 +67,7 @@ Admins and farm staff manage **one shared farm**, regardless of who created a re
 
 Orders follow `menunggu → dikonfirmasi → diproses → dikirim → selesai`. Farm staff may cancel an open order; buyers may cancel their own waiting or confirmed orders. Transactions and row locks prevent overselling and repeated stock restoration. Only completed orders count as farm revenue. Order lines preserve the purchased name, unit and price.
 
-Bank/contact information belongs to the farm and is edited by admins from Profile → Rekening. Payment is a manual transfer; confirmation and delivery are arranged with the farm. There is no payment gateway or automatic payment verification. Product photos are stored on Laravel's public disk (JPEG/PNG/WebP, max 2 MB). The dashboard's Upload File action remains a local preview, matching the prototype.
+Bank/contact information belongs to the farm and is edited by admins from Profile → Rekening. Payment is a manual transfer; confirmation and delivery are arranged with the farm. There is no payment gateway or automatic payment verification. Product photos are stored on Laravel's public disk (JPEG/PNG/WebP, max 2 MB). Upload product photos from the product form; there is no standalone file-upload tool.
 
 Referenced products/customers cannot be deleted. Livestock/caretakers are archived and their composite-key contract history is retained. Removing an account deactivates it and invalidates its sessions while preserving business records.
 
@@ -89,9 +89,9 @@ npm run build
 npm run test:browser
 ```
 
-All test entry points verify the exact database name before writing. The preparation and browser commands recreate **only `dlingo_jamur_test`**. Feature tests use rollback transactions. The concurrency check starts independent PHP workers for last-item checkout and simultaneous cancellation. Browser checks start/stop their own PHP server, exercise actual CSRF and database sessions, cover all 17 pages at desktop/mobile sizes, upload a photo, and test farm/admin/buyer workflows. HTTP logs and a screenshot of the failing page are stored in ignored `test-results/`. Routine screenshots are disabled; opt in with `BROWSER_SCREENSHOTS=1 npm run test:browser`. Browser checks also cover 320px/768px/1024px navigation, role menus, dialog focus restoration, fixed purchase controls, missing photos, long names, sold-out products, and stale-stock checkout.
+All test entry points verify the exact database name before writing. The preparation and browser commands recreate **only `dlingo_jamur_test`**. Feature tests use rollback transactions. The concurrency check starts independent PHP workers for last-item checkout and simultaneous cancellation. Browser checks start/stop their own PHP server, exercise actual CSRF and database sessions, cover application pages at desktop/mobile sizes, upload a photo, and test farm/admin/buyer workflows. HTTP logs and a screenshot of the failing page are stored in ignored `test-results/`. Routine screenshots are disabled; opt in with `BROWSER_SCREENSHOTS=1 npm run test:browser`. Browser checks also cover 320px/768px/1024px navigation, role menus, dialog focus restoration, fixed purchase controls, missing photos, long names, sold-out products, and stale-stock checkout.
 
-Browser tests use `/usr/bin/chromium` by default; set `CHROMIUM_PATH` to another installed Chromium executable. `BROWSER_PORT` defaults to 8123. The temporary `.env.browser` file is ignored and removed after the run.
+Browser tests default to Chromium at `/usr/bin/chromium`. Set `BROWSER_ENGINE=firefox` or `BROWSER_ENGINE=webkit` to use another Playwright engine after installing its matching browser (for example, `npx playwright install firefox`). `BROWSER_EXECUTABLE_PATH` overrides the selected engine executable; `CHROMIUM_PATH` remains supported for Chromium. `BROWSER_PORT` defaults to 8123. The temporary `.env.browser` file is ignored and removed after the run.
 
 See [database notes](docs/database.md) for schema mappings and migration details. This branch prepares the local application and remote database; web-server deployment is a separate step.
 

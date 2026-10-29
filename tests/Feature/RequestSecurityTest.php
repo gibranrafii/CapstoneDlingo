@@ -43,9 +43,9 @@ class RequestSecurityTest extends TestCase
     public function test_login_failures_share_a_limit_across_portals_and_case_variants(): void
     {
         config(['security.limits.failed_login' => 2]);
-        $this->post('/login', ['username' => 'admin', 'password' => 'wrong'])->assertSessionHasErrors('username');
-        $this->post('/admin/login', ['username' => ' ADMIN ', 'password' => 'wrong'])->assertSessionHasErrors('username');
-        $this->post('/admin/login', ['username' => 'admin', 'password' => 'demo12345'])->assertStatus(429)->assertHeader('Retry-After');
+        $this->post('/login', ['username' => 'petani', 'password' => 'wrong'])->assertSessionHasErrors('username');
+        $this->post('/admin/login', ['username' => ' PETANI ', 'password' => 'wrong'])->assertSessionHasErrors('username');
+        $this->post('/admin/login', ['username' => 'petani', 'password' => 'demo12345'])->assertStatus(429)->assertHeader('Retry-After');
         $this->assertGuest();
     }
 
@@ -70,9 +70,9 @@ class RequestSecurityTest extends TestCase
     public function test_account_limit_covers_different_ips_and_username_email_aliases(): void
     {
         config(['security.limits.failed_login_account' => 2]);
-        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.1'])->post('/admin/login', ['username' => 'admin', 'password' => 'wrong'])->assertSessionHasErrors('username');
+        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.1'])->post('/admin/login', ['username' => 'petani', 'password' => 'wrong'])->assertSessionHasErrors('username');
         $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.2'])->post('/admin/login', ['username' => 'BUDI@example.com', 'password' => 'wrong'])->assertSessionHasErrors('username');
-        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.3'])->post('/admin/login', ['username' => 'admin', 'password' => 'demo12345'])->assertStatus(429);
+        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.3'])->post('/admin/login', ['username' => 'petani', 'password' => 'demo12345'])->assertStatus(429);
         $this->assertGuest();
     }
 

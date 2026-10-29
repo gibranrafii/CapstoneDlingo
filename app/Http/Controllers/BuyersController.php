@@ -61,6 +61,6 @@ class BuyersController extends Controller
             return back()->with('error', 'Pembeli terhubung dengan akun atau pesanan dan tidak dapat dihapus.');
         }
 
-        return redirect()->route('manage.buyers.index')->with('success','Pembeli berhasil dihapus.');
+        return redirect()->route('manage.buyers.index')->with('success', 'Pembeli berhasil dihapus.');
     }
 }

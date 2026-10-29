@@ -13,7 +13,7 @@
         <a class="nav-link {{ $isActive($pages)?'active':'' }}" @if($isActive($pages)) aria-current="page" @endif href="{{ route($route) }}">{{ $ui::icon($icon) }}{{ $label }}</a>
         @endforeach
         <div class="nav-tools">
-            @foreach([['bank','Rekening','bank'],['history','Riwayat','history'],['upload','Upload File','upload']] as [$target,$label,$icon])<button class="nav-link" type="button" data-open="{{ $target }}">{{ $ui::icon($icon) }}{{ $label }}</button>@endforeach
+            @foreach([['bank','Rekening','bank'],['history','Riwayat','history']] as [$target,$label,$icon])<button class="nav-link" type="button" data-open="{{ $target }}">{{ $ui::icon($icon) }}{{ $label }}</button>@endforeach
             <form method="POST" action="{{ route('logout') }}">@csrf<button class="nav-link" type="submit">{{ $ui::icon('login') }}Keluar</button></form>
         </div>
     </nav>
@@ -25,7 +25,7 @@
 </nav>
 <x-dialog id="staff-more" title="Menu Lainnya"><nav class="more-menu" aria-label="Menu lainnya">
     @foreach($extraNav as [$label,$route,$icon,$pages])<a class="nav-link" href="{{ route($route) }}">{{ $ui::icon($icon) }}{{ $label }}</a>@endforeach
-    @foreach([['bank','Rekening','bank'],['history','Riwayat','history'],['upload','Upload File','upload']] as [$target,$label,$icon])<button class="nav-link" type="button" data-open="{{ $target }}">{{ $ui::icon($icon) }}{{ $label }}</button>@endforeach
+    @foreach([['bank','Rekening','bank'],['history','Riwayat','history']] as [$target,$label,$icon])<button class="nav-link" type="button" data-open="{{ $target }}">{{ $ui::icon($icon) }}{{ $label }}</button>@endforeach
     <form method="POST" action="{{ route('logout') }}">@csrf<button class="nav-link" type="submit">{{ $ui::icon('login') }}Keluar</button></form>
 </nav></x-dialog>
 @else

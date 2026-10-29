@@ -17,7 +17,7 @@ class LoginTest extends TestCase
 
     public function test_username_and_email_logins_authenticate_real_accounts(): void
     {
-        foreach (['admin', 'budi@example.com'] as $identity) {
+        foreach (['petani', 'budi@example.com'] as $identity) {
             $this->post('/admin/login', ['username' => $identity, 'password' => 'demo12345', 'remember' => 1])->assertRedirect('/admin');
             $this->assertAuthenticatedAs(User::find(2));
             auth()->logout();
@@ -26,10 +26,10 @@ class LoginTest extends TestCase
 
     public function test_wrong_password_and_disabled_accounts_cannot_login(): void
     {
-        $this->post('/login', ['username' => 'admin', 'password' => 'wrong'])->assertSessionHasErrors('username');
+        $this->post('/login', ['username' => 'petani', 'password' => 'wrong'])->assertSessionHasErrors('username');
         $this->assertGuest();
         User::find(2)->update(['is_active' => false]);
-        $this->post('/login', ['username' => 'admin', 'password' => 'demo12345'])->assertSessionHasErrors('username');
+        $this->post('/login', ['username' => 'petani', 'password' => 'demo12345'])->assertSessionHasErrors('username');
         $this->assertGuest();
     }
 

@@ -51,6 +51,6 @@ class OrdersController extends Controller
     {
         $service->transition($r->user(), $id, 'dibatalkan');
 
-        return redirect()->route('buyer.orders')->with('success','Pesanan dibatalkan. Stok telah dikembalikan.');
+        return redirect()->route('buyer.orders')->with('success', 'Pesanan dibatalkan. Stok telah dikembalikan.');
     }
 }

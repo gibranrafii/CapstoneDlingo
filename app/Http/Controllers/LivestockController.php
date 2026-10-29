@@ -55,6 +55,6 @@ class LivestockController extends Controller
             Activity::record('Ternak '.$animal->nama_ternak.' diarsipkan', 'Ternak');
         });
 
-        return redirect()->route('manage.livestock.index')->with('success','Ternak dihapus dari daftar aktif; riwayat kontrak disimpan.');
+        return redirect()->route('manage.livestock.index')->with('success', 'Ternak dihapus dari daftar aktif; riwayat kontrak disimpan.');
     }
 }

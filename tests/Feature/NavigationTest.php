@@ -22,6 +22,14 @@ class NavigationTest extends TestCase
             ->assertDontSee('id="staff-more"', false)->assertDontSee(route('manage.products.index'), false);
     }
 
+    public function test_staff_tools_only_offer_real_uploads_and_localized_activity(): void
+    {
+        config(['app.locale' => 'id']);
+        $this->actingAs(User::find(2))->get('/admin')->assertOk()->assertDontSee('Upload File')
+            ->assertDontSee('hours ago')->assertSee('jam yang lalu');
+        $this->get('/admin/products')->assertOk()->assertSee('Foto Produk');
+    }
+
     public function test_guest_can_browse_without_receiving_staff_actions(): void
     {
         $this->get('/')->assertOk()->assertSee('Navigasi seluler')->assertSee(route('register'), false)
