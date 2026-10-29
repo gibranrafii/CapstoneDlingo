@@ -23,7 +23,7 @@ class SecurityHeaders
         $scripts = "'self'";
         $styles = "'self'";
         $connections = "'self'";
-        if (! app()->isProduction() && is_file(public_path('hot'))) {
+        if (! app()->environment(['production', 'staging']) && is_file(public_path('hot'))) {
             $url = trim(file_get_contents(public_path('hot')));
             $parts = parse_url($url);
             if (in_array($parts['scheme'] ?? '', ['http', 'https'], true) && isset($parts['host'])) {
@@ -46,7 +46,7 @@ class SecurityHeaders
         if ($account) {
             $response->headers->set('Referrer-Policy', 'no-referrer');
         }
-        if (app()->isProduction() && $request->isSecure()) {
+        if (app()->environment(['production', 'staging']) && $request->isSecure()) {
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000');
         }
         if (in_array($response->getStatusCode(), [401, 403, 419], true)) {

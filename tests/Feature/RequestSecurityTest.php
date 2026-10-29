@@ -56,6 +56,36 @@ class RequestSecurityTest extends TestCase
         $this->post('/admin/login', ['username' => 'second', 'password' => 'wrong'])->assertStatus(429)->assertHeader('Retry-After');
     }
 
+    public function test_login_lockout_lasts_fifteen_minutes(): void
+    {
+        config(['security.limits.failed_login' => 1]);
+        $credentials = ['username' => 'pembeli', 'password' => 'wrong'];
+        $this->post('/login', $credentials)->assertSessionHasErrors('username');
+        $this->travel(61)->seconds();
+        $this->post('/login', $credentials)->assertStatus(429);
+        $this->travel(840)->seconds();
+        $this->post('/login', ['username' => 'pembeli', 'password' => 'demo12345'])->assertRedirect('/dashboard/pembeli');
+    }
+
+    public function test_account_limit_covers_different_ips_and_username_email_aliases(): void
+    {
+        config(['security.limits.failed_login_account' => 2]);
+        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.1'])->post('/admin/login', ['username' => 'admin', 'password' => 'wrong'])->assertSessionHasErrors('username');
+        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.2'])->post('/admin/login', ['username' => 'BUDI@example.com', 'password' => 'wrong'])->assertSessionHasErrors('username');
+        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.3'])->post('/admin/login', ['username' => 'admin', 'password' => 'demo12345'])->assertStatus(429);
+        $this->assertGuest();
+    }
+
+    public function test_successful_login_does_not_clear_other_ips_account_failure_history(): void
+    {
+        config(['security.limits.failed_login_account' => 2]);
+        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.1'])->post('/login', ['username' => 'pembeli', 'password' => 'wrong'])->assertSessionHasErrors('username');
+        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.2'])->post('/login', ['username' => 'pembeli', 'password' => 'demo12345'])->assertRedirect('/dashboard/pembeli');
+        $this->post('/logout');
+        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.3'])->post('/login', ['username' => 'pembeli', 'password' => 'wrong'])->assertSessionHasErrors('username');
+        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.4'])->post('/login', ['username' => 'pembeli', 'password' => 'demo12345'])->assertStatus(429);
+    }
+
     public function test_sensitive_actions_are_throttled_per_account(): void
     {
         config(['security.limits.cart' => 1, 'security.limits.checkout' => 1]);
@@ -109,5 +139,22 @@ class RequestSecurityTest extends TestCase
         $logger->shouldReceive('notice')->once()->with('test.event', Mockery::on(fn ($context) => $context['target_id'] === 3 && array_intersect_key($context, array_flip(['password', 'token', 'email', 'url'])) === []));
         Log::shouldReceive('channel')->with('security')->andReturn($logger);
         SecurityEvent::record('test.event', ['target_id' => 3, 'password' => 'secret', 'token' => 'secret', 'email' => 'private@example.test', 'url' => '/reset-password/secret']);
+    }
+
+    public function test_staging_enforces_https_secure_cookies_and_only_the_configured_host(): void
+    {
+        $this->app->instance('env', 'staging');
+        config(['app.url' => 'https://staging.example.test', 'app.debug' => true, 'session.secure' => false, 'session.domain' => '.example.test']);
+        $this->app->getProvider(AppServiceProvider::class)->boot();
+        $response = $this->get('https://staging.example.test/login')->assertOk()->assertHeader('Strict-Transport-Security', 'max-age=31536000');
+        $this->assertFalse(config('app.debug'));
+        $this->assertSame('https://staging.example.test/login', route('login'));
+        $cookie = collect($response->headers->getCookies())->first(fn ($cookie) => $cookie->getName() === config('session.cookie'));
+        $this->assertTrue($cookie->isSecure());
+        $this->assertTrue($cookie->isHttpOnly());
+        $this->assertSame('lax', $cookie->getSameSite());
+        $this->assertEmpty($cookie->getDomain());
+        $this->get('https://localhost/login')->assertStatus(400);
+        $this->get('https://127.0.0.1/login')->assertStatus(400);
     }
 }
